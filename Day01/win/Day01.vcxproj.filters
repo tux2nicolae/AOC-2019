@@ -6,10 +6,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\Day1.in">
+    <None Include="..\src\Day01.in">
       <Filter>src</Filter>
     </None>
-    <None Include="..\src\Day1.out">
+    <None Include="..\src\Day01.out">
       <Filter>src</Filter>
     </None>
   </ItemGroup>

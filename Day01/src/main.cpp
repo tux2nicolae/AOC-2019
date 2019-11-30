@@ -3,6 +3,7 @@
  * @author : Nicolae Telechi
  */
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <memory>
 #include <algorithm>
@@ -10,16 +11,31 @@
 #include <sstream>
 #include <fstream>
 #include <map>
+#include <set>
 #include <unordered_map>
 #include <optional>
 #include <numeric>
 
 using namespace std;
 
+#include "../../AOCLib/src/Algorithm.h"
+#include "../../AOCLib/src/FStreamReader.h"
+#include "../../AOCLib/src/FStreamWriter.h"
+#include "../../AOCLib/src/Math.h"
+#include "../../AOCLib/src/Time.h"
+
+
 int main()
 {
-  ifstream in("D:\\AOC-2019\\Day1\\Day1.in");
-  ofstream out("D:\\AOC-2019\\Day1\\Day1.out");
+  ifstream in("..\\..\\Day01\\src\\Day01.in");
+  ofstream out("..\\..\\Day01\\src\\Day01.out");
+
+  FStreamReader reader(in);
+  vector<int> v = reader.ReadVector();
+  
+  // out
+  // FStreamWriter writer(out);
+  // writer.WriteVector(v);
 
   return 0;
 }
