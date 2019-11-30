@@ -1,7 +1,4 @@
 *.user
-*.sln
-*.vcxproj
-*.filters
 .vs/
 ipch/
 Debug/
