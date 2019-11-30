@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * Advent of code 2018
+ * Advent of code 2019
  * @author : Nicolae Telechi
  */
 class FStreamReader
