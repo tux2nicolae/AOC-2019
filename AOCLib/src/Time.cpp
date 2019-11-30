@@ -2,7 +2,7 @@
  * Advent of code 2018
  * @author : Nicolae Telechi
  */
-#include "stdafx.h"
+#include "pch.h"
 #include "Time.h"
 
 // number of seconds (not counting leap seconds) since 00:00, Jan 1 1970 UTC

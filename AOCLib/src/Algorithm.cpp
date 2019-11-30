@@ -2,7 +2,7 @@
  * Advent of code 2018
  * @author : Nicolae Telechi
  */
-#include "stdafx.h"
+#include "pch.h"
 #include "Algorithm.h"
 
 int AOC::Fibonaci(int n, int modulo)
@@ -14,7 +14,7 @@ int AOC::Fibonaci(int n, int modulo)
   return fibonaciMatrix[1][1];
 }
 
-std::vector<bool> AOC::Eratosthenes(int n)
+std::vector<bool> AOC::Eratosthenes(size_t n)
 {
   vector<bool> sieve;
   sieve.resize(n + 1); // + 1 for n

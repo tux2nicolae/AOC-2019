@@ -2,7 +2,7 @@
  * Advent of code 2018
  * @author : Nicolae Telechi
  */
-#include "stdafx.h"
+#include "pch.h"
 #include "Math.h"
 
 int AOC::Abs(int number)

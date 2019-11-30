@@ -7,7 +7,7 @@
 namespace AOC
 {
   int Fibonaci(int n, int modulo);
-  vector<bool> Eratosthenes(int n);
+  vector<bool> Eratosthenes(size_t n);
 
 
   struct Coordonate
