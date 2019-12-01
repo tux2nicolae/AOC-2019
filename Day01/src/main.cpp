@@ -33,6 +33,19 @@ int main()
   FStreamReader reader(in);
   vector<int> v = reader.ReadVector();
   
+  long long s = 0;
+  for (auto x : v)
+  {
+	  int  mass = x / 3 - 2;
+	  while (mass > 0)
+	  {
+	      s += mass;
+		  mass = mass / 3 - 2;
+	  }
+  }
+
+  out << s;
+
   // out
   // FStreamWriter writer(out);
   // writer.WriteVector(v);
