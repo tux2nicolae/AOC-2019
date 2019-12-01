@@ -36,12 +36,12 @@ int main()
   long long s = 0;
   for (auto x : v)
   {
-	  int  mass = x / 3 - 2;
-	  while (mass > 0)
-	  {
-	      s += mass;
-		  mass = mass / 3 - 2;
-	  }
+      int  mass = x / 3 - 2;
+      while (mass > 0)
+      {
+          s += mass;
+          mass = mass / 3 - 2;
+      }
   }
 
   out << s;
