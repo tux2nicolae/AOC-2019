@@ -4,6 +4,7 @@
  */
 #include "pch.h"
 #include "Algorithm.h"
+#include "Math.h"
 
 int AOC::Fibonaci(int n, int modulo)
 {

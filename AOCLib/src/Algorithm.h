@@ -6,28 +6,12 @@
  */
 namespace AOC
 {
+  struct Coordonate;
+
   int Fibonaci(int n, int modulo);
   vector<bool> Eratosthenes(size_t n);
 
-
-  struct Coordonate
-  {
-    int x{ 0 };
-    int y{ 0 };
-
-    bool operator < (const Coordonate& second) const
-    {
-      if (x < second.x)
-        return true;
-      else if (x == second.x)
-        return y < second.y;
-
-      return false;
-    }
-  };
-
   pair<vector<vector<int>>, set<int>> Lee(const vector<Coordonate> & aCoordonates, vector<vector<int>> & aMap);
-
 
   tuple<int, int, int> SubsequenceOfLargestSum(const vector<int> & sequence);
 
