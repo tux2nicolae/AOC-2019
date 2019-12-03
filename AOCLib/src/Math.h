@@ -6,26 +6,26 @@
  */
 namespace AOC
 {
-  struct Coordonate
+  struct Point
   {
     int x{ 0 };
     int y{ 0 };
 
-    bool operator < (const Coordonate& second) const
+    bool operator==(const Point& second) const
     {
-      if (x < second.x)
-        return true;
-      else if (x == second.x)
-        return y < second.y;
+      return tie(x, y) == tie(second.x, second.y);
+    };
 
-      return false;
-    }
+    bool operator<(const Point& second) const
+    {
+      return tie(x, y) < tie(second.x, second.y);
+    };
   };
 
   int Abs(int number);
 
   int ManhattenDistance(int x1, int y1, int x2, int y2);
-  int ManhattenDistance(const Coordonate & a, const Coordonate& b);
+  int ManhattenDistance(const Point & a, const Point& b);
 
   int Cmmdc(int n, int m);
   int Cmmmc(int n, int m);

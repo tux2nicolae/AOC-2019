@@ -6,12 +6,12 @@
  */
 namespace AOC
 {
-  struct Coordonate;
+  struct Point;
 
   int Fibonaci(int n, int modulo);
   vector<bool> Eratosthenes(size_t n);
 
-  pair<vector<vector<int>>, set<int>> Lee(const vector<Coordonate> & aCoordonates, vector<vector<int>> & aMap);
+  pair<vector<vector<int>>, set<int>> Lee(const vector<Point> & aCoordonates, vector<vector<int>> & aMap);
 
   tuple<int, int, int> SubsequenceOfLargestSum(const vector<int> & sequence);
 

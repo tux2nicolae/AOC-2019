@@ -32,17 +32,17 @@ struct Val
   int line2Sum{};
 };
 
-AOC::Coordonate init{ 0, 0 };
+AOC::Point init{ 0, 0 };
 unordered_map<int, unordered_map<int, Val>> v;
 
-map<AOC::Coordonate, Val> intersections;
+map<AOC::Point, Val> intersections;
 
 void run(std::istringstream& stream, char id)
 {
   char _, control = ' ';
   int distance = 0;
 
-  AOC::Coordonate o = init;
+  AOC::Point o = init;
 
   int steps = 0;
   auto compute = [&](auto& p)

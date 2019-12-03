@@ -31,7 +31,7 @@ std::vector<bool> AOC::Eratosthenes(size_t n)
   return sieve;
 }
 
-pair<vector<vector<int>>, set<int>> AOC::Lee(const vector<Coordonate> & aCoordonates, vector<vector<int>> & aMap)
+pair<vector<vector<int>>, set<int>> AOC::Lee(const vector<Point> & aCoordonates, vector<vector<int>> & aMap)
 {
   set<int> infinitePoints;
 
@@ -40,11 +40,11 @@ pair<vector<vector<int>>, set<int>> AOC::Lee(const vector<Coordonate> & aCoordon
   for (auto & line : distances)
     line.resize(aMap[0].size());
   
-  queue<Coordonate> unvisited;
+  queue<Point> unvisited;
   for (const auto & startingPoint : aCoordonates)
     unvisited.push(startingPoint);
 
-  auto isInBoundary = [&](const Coordonate & to)-> bool
+  auto isInBoundary = [&](const Point & to)-> bool
   {
     return !(to.x < 0 || to.y < 0 || to.x >= aMap.size() || to.y >= aMap[0].size());
   };
@@ -63,7 +63,7 @@ pair<vector<vector<int>>, set<int>> AOC::Lee(const vector<Coordonate> & aCoordon
 
     for (int i = 0; i < 4; ++i)
     {
-      Coordonate to;
+      Point to;
       to.x = from.x + directionX[i];
       to.y = from.y + directionY[i];
 
