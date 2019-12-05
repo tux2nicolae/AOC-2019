@@ -72,7 +72,7 @@ int main()
     }
     else if (opcode == 4)
     {
-      int a = v[v[++i]];
+      int a = aMode == 1 ? v[++i] : v[v[++i]];
       cout << a << " ";
     }
 
