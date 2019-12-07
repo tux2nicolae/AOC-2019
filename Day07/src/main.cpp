@@ -176,6 +176,10 @@ void backTrack(const vector<int> & memory, int depth)
     return;
   }
 
+  // part one
+  // for (int i = 0; i <= 4; ++i)
+
+  // part two
   for (int i = 5; i <= 9; ++i)
   {
     if(!used[i])
