@@ -11,10 +11,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\Day09.in">
+    <None Include="..\src\Day23.in">
       <Filter>src</Filter>
     </None>
-    <None Include="..\src\Day09.out">
+    <None Include="..\src\Day23.out">
       <Filter>src</Filter>
     </None>
   </ItemGroup>

@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{7B254982-1A5C-494C-BB8C-E0024B647BD6}</ProjectGuid>
+    <ProjectGuid>{C64777CE-CEBF-4060-9CA8-532415B634F0}</ProjectGuid>
     <RootNamespace>Day01</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -135,8 +135,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\Day09.in" />
-    <None Include="..\src\Day09.out" />
+    <None Include="..\src\Day17.in" />
+    <None Include="..\src\Day17.out" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
