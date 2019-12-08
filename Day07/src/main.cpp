@@ -24,9 +24,6 @@ using namespace std;
 #include "../../AOCLib/src/Math.h"
 #include "../../AOCLib/src/Time.h"
 
-unordered_map<string, vector<string>> graph;
-unordered_map<string, int> dependencies;
-
 class Amplyfier {
 public:
   Amplyfier(const vector<int> memory)
@@ -198,16 +195,8 @@ int main()
   ifstream in("..\\..\\Day07\\src\\Day07.in");
   ofstream out("..\\..\\Day07\\src\\Day07.out");
 
-  vector<int> memory;
-  while (in.good())
-  {
-    int x;
-    in >> x;
-    memory.push_back(x);
-
-    char _;
-    in >> _;
-  }
+  FStreamReader reader(in);
+  auto memory = reader.ReadVectorSeparatedByChar();
 
   // vector<int> testPhases{ 9,8,7,6,5 };
   // auto ret = runPhases(memory, testPhases);

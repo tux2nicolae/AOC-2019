@@ -21,6 +21,7 @@
 #include <optional>
 #include <numeric>
 #include <queue>
+#include <regex>
 
 #include <assert.h>
 #include <ctime>

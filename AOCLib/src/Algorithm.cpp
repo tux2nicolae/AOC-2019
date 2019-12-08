@@ -137,6 +137,16 @@ std::vector<std::string> AOC::Explode(const std::string & str, char separator)
   return result;
 }
 
+int AOC::RegexMatchInt(const string& str, const string& regexStr)
+{
+  smatch match;
+  regex_match(str, match, regex(regexStr));
+  assert(match.size() == 1);
+
+  // 0
+  return stoi(match[0]);
+}
+
 namespace AOC::detail
 {
   vector<int> GetPartialSums(const vector<int> & sequence)

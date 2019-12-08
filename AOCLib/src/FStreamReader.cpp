@@ -22,6 +22,21 @@ vector<int> FStreamReader::ReadVector()
   return ret;
 }
 
+vector<int> FStreamReader::ReadVectorSeparatedByChar()
+{
+  vector<int> ret;
+  while (mFileStream.good())
+  {
+    int x{};
+    char _ {};
+
+    mFileStream >> x >> _;
+    ret.push_back(x);
+  }
+
+  return ret;
+}
+
 vector<int> FStreamReader::ReadLineAsVectorOfDigits()
 {
   vector<int> ret;
