@@ -41,8 +41,8 @@ int main()
   int min = numeric_limits<int>::max();
   vector<int> minFreq;
 
-  const int kLayerSize = kRows * kColumns;
-  const int kLayers = digits.size() / kLayerSize;
+  const size_t kLayerSize = kRows * kColumns;
+  const size_t kLayers = digits.size() / kLayerSize;
 
   for (int k = 0; k < kLayers; ++k)
   {
