@@ -5,7 +5,6 @@
 #include "pch.h"
 #include "FStreamReader.h"
 
-
 FStreamReader::FStreamReader(ifstream & aIn) 
   : mFileStream(aIn)
 {
@@ -19,6 +18,26 @@ vector<int> FStreamReader::ReadVector()
   int n = 0;
   while (mFileStream >> n)
     ret.push_back(n);
+
+  return ret;
+}
+
+vector<int> FStreamReader::ReadLineAsVectorOfDigits()
+{
+  vector<int> ret;
+
+  string line;
+  if (!getline(mFileStream, line))
+    return ret;
+
+  std::istringstream ss(line);
+
+  char n = 0;
+  while (ss >> n)
+  {
+    if ('0' <= n && n <= '9')
+      ret.push_back(n - '0');
+  }
 
   return ret;
 }
@@ -79,26 +98,6 @@ std::vector<std::vector<string>> FStreamReader::ReadMatrixOfWords()
     auto lineOfWords = ReadLineAsVectorOfWords();
     if (!lineOfWords.empty())
       ret.push_back(lineOfWords);
-  }
-
-  return ret;
-}
-
-vector<int> FStreamReader::ReadLineAsVectorOfDigits()
-{
-  vector<int> ret;
-
-  string line;
-  if (!getline(mFileStream, line))
-    return ret;
-
-  std::istringstream ss(line);
-
-  char n = 0;
-  while (ss >> n)
-  {
-    if ('0' <= n && n <= '9')
-      ret.push_back(n - '0');
   }
 
   return ret;

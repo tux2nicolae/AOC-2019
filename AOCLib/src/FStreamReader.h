@@ -13,7 +13,9 @@ public:
   FStreamReader(ifstream & aIn);
 
   vector<int> ReadVector();
+  vector<int> ReadLineAsVectorOfDigits();
   vector<string> ReadVectorOfWords();
+  vector<string> ReadLineAsVectorOfWords();
 
   vector<vector<int>> ReadMatrix();
   vector<vector<int>> ReadMatrixOfDigits();
@@ -22,6 +24,4 @@ public:
 private:
   ifstream & mFileStream;
 
-  vector<int> ReadLineAsVectorOfDigits();
-  vector<string> ReadLineAsVectorOfWords();
 };
