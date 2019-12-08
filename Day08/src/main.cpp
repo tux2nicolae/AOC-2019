@@ -32,8 +32,8 @@ int main()
   FStreamReader reader(in);
   auto digits = reader.ReadLineAsVectorOfDigits();
   
-  const int kRows = 6;
-  const int kColumns = 25;
+  const size_t kRows = 6;
+  const size_t kColumns = 25;
   
   vector<vector<int>> image(kRows, vector<int>(kColumns, 0));
   vector<vector<bool>> written(kRows, vector<bool>(kColumns, false));
