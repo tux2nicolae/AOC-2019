@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <optional>
 #include <numeric>
+#include <assert.h>
 
 using namespace std;
 
