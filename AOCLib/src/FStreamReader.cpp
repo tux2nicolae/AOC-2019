@@ -22,12 +22,12 @@ vector<int> FStreamReader::ReadVector()
   return ret;
 }
 
-vector<int> FStreamReader::ReadVectorSeparatedByChar()
+vector<long long> FStreamReader::ReadVectorSeparatedByChar()
 {
-  vector<int> ret;
+  vector<long long> ret;
   while (mFileStream.good())
   {
-    int x{};
+    long long x{};
     char _ {};
 
     mFileStream >> x >> _;

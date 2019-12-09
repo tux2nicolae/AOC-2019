@@ -13,7 +13,7 @@ public:
   FStreamReader(ifstream & aIn);
 
   vector<int> ReadVector();
-  vector<int> ReadVectorSeparatedByChar();
+  vector<long long> ReadVectorSeparatedByChar();
   vector<int> ReadLineAsVectorOfDigits();
   vector<string> ReadVectorOfWords();
   vector<string> ReadLineAsVectorOfWords();
