@@ -27,40 +27,11 @@ using namespace std;
 
 using INT = long long;
 
-class Amplyfier {
+class IntCodeComputer {
 public:
-  Amplyfier(const vector<INT> & memory)
-    : v(memory)
+  IntCodeComputer(const vector<INT> & memory)
+    : memory(memory)
   {
-  }
-
-  INT readMode(INT mode)
-  {
-    if (mode == 0)
-    {
-      size_t pos = v[++i];
-      return v[pos];
-    }
-    else if (mode == 1)
-    {
-      return v[++i];
-    }
-    else if (mode == 2)
-    {
-      return v[v[++i] + mRelativeBase];
-    }
-
-    return 0;
-  }
-
-  INT readModeOutput(INT mode)
-  {
-    if (mode == 0)
-      return v[++i];
-    if(mode == 2)
-      return v[++i] + mRelativeBase;
-
-    return 0;
   }
 
   bool run(const vector<INT>& input)
@@ -68,44 +39,44 @@ public:
     INT inputN = 0;
     while (true)
     {
-      INT opcode = v[++i] % 100;
+      INT opcode = memory[++i] % 100;
       if (opcode == 99)
       {
         return true;
       }
 
-      INT aMode = (v[i] / 100) % 10;
-      INT bMode = (v[i] / 1000) % 10;
-      INT cMode = (v[i] / 10000) % 10;
+      INT aMode = (memory[i] / 100) % 10;
+      INT bMode = (memory[i] / 1000) % 10;
+      INT cMode = (memory[i] / 10000) % 10;
 
       if (opcode == 1)
       {
-        INT a = readMode(aMode);
-        INT b = readMode(bMode);
+        INT a = getValue(aMode);
+        INT b = getValue(bMode);
 
-        INT c = readModeOutput(cMode);
-        v[c] = a + b;
+        INT c = getOutputPos(cMode);
+        memory[c] = a + b;
       }
       else if (opcode == 2)
       {
-        INT a = readMode(aMode);
-        INT b = readMode(bMode);
+        INT a = getValue(aMode);
+        INT b = getValue(bMode);
 
-        INT c = readModeOutput(cMode);
-        v[c] = a * b;
+        INT c = getOutputPos(cMode);
+        memory[c] = a * b;
       }
 
       //
       else if (opcode == 3)
       {
-        INT a = readModeOutput(aMode);
-
         INT value = input[inputN++];
-        v[a] = value;
+
+        INT a = getOutputPos(aMode);
+        memory[a] = value;
       }
       else if (opcode == 4)
       {
-        INT a = readMode(aMode);
+        INT a = getValue(aMode);
 
         mOutput = a;
         cout << mOutput << " ";
@@ -115,40 +86,40 @@ public:
       //
       else if (opcode == 5)
       {
-        INT a = readMode(aMode);
-        INT b = readMode(bMode);
+        INT a = getValue(aMode);
+        INT b = getValue(bMode);
 
         if (a)
           i = b - 1;
       }
       else if (opcode == 6)
       {
-        INT a = readMode(aMode);
-        INT b = readMode(bMode);
+        INT a = getValue(aMode);
+        INT b = getValue(bMode);
 
         if (!a)
           i = b - 1;
       }
       else if (opcode == 7)
       {
-        INT a = readMode(aMode);
-        INT b = readMode(bMode);
+        INT a = getValue(aMode);
+        INT b = getValue(bMode);
 
         
-        INT c = readModeOutput(cMode);
-        v[c] = a < b;
+        INT c = getOutputPos(cMode);
+        memory[c] = a < b;
       }
       else if (opcode == 8)
       {
-        INT a = readMode(aMode);
-        INT b = readMode(bMode);
+        INT a = getValue(aMode);
+        INT b = getValue(bMode);
 
-        INT c = readModeOutput(cMode);
-        v[c] = a == b;
+        INT c = getOutputPos(cMode);
+        memory[c] = a == b;
       }
       else if (opcode == 9)
       {
-        INT a = readMode(aMode);
+        INT a = getValue(aMode);
         mRelativeBase += a;
       }
     }
@@ -165,12 +136,45 @@ private:
   INT i{ -1 };
 
   // memory
-  vector<INT> v;
+  vector<INT> memory;
 
   // output
   INT mOutput{ 0 };
 
+  // relative base
   INT mRelativeBase{ 0 };
+
+  //---------------------------------------
+
+  INT getValue(INT mode)
+  {
+    if (mode == 0)
+    {
+      size_t pos = memory[++i];
+      return memory[pos];
+    }
+    else if (mode == 1)
+    {
+      return memory[++i];
+    }
+    else if (mode == 2)
+    {
+      return memory[memory[++i] + mRelativeBase];
+    }
+
+    return 0;
+  }
+
+  INT getOutputPos(INT mode)
+  {
+    if (mode == 0)
+      return memory[++i];
+    if (mode == 2)
+      return memory[++i] + mRelativeBase;
+
+    assert(mode != 1);
+    return 0;
+  }
 };
 
 int main()
@@ -179,15 +183,16 @@ int main()
   ofstream out("..\\..\\Day09\\src\\Day09.out");
 
   FStreamReader reader(in);
+
   auto v = reader.ReadVectorSeparatedByChar();
-  
   v.resize(v.size() + 10000000);
-  Amplyfier amplifiers(v);
+
+  IntCodeComputer computer(v);
 
   vector<INT> input;
   input.push_back(2);
 
-  amplifiers.run(input);
+  computer.run(input);
 
   return 0;
 }
