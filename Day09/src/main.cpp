@@ -184,7 +184,7 @@ int main()
 
   FStreamReader reader(in);
 
-  auto v = reader.ReadVectorSeparatedByChar();
+  auto v = reader.ReadVectorSeparatedByChar<INT>();
   v.resize(v.size() + 10000000);
 
   IntCodeComputer computer(v);

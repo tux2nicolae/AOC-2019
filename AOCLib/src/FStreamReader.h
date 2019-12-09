@@ -12,8 +12,34 @@ public:
    */
   FStreamReader(ifstream & aIn);
 
-  vector<int> ReadVector();
-  vector<long long> ReadVectorSeparatedByChar();
+  template<typename T = int>
+  vector<T> ReadVector()
+  {
+    vector<T> ret;
+
+    T n = 0;
+    while (mFileStream >> n)
+      ret.push_back(n);
+
+    return ret;
+  }
+
+  template<typename T = int>
+  vector<T> ReadVectorSeparatedByChar()
+  {
+    vector<T> ret;
+    while (mFileStream.good())
+    {
+      T x{};
+      char _{};
+
+      mFileStream >> x >> _;
+      ret.push_back(x);
+    }
+
+    return ret;
+  }
+
   vector<int> ReadLineAsVectorOfDigits();
   vector<string> ReadVectorOfWords();
   vector<string> ReadLineAsVectorOfWords();

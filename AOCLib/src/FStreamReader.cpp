@@ -11,32 +11,6 @@ FStreamReader::FStreamReader(ifstream & aIn)
   assert(mFileStream.good());
 }
 
-vector<int> FStreamReader::ReadVector()
-{
-  vector<int> ret;
-
-  int n = 0;
-  while (mFileStream >> n)
-    ret.push_back(n);
-
-  return ret;
-}
-
-vector<long long> FStreamReader::ReadVectorSeparatedByChar()
-{
-  vector<long long> ret;
-  while (mFileStream.good())
-  {
-    long long x{};
-    char _ {};
-
-    mFileStream >> x >> _;
-    ret.push_back(x);
-  }
-
-  return ret;
-}
-
 vector<int> FStreamReader::ReadLineAsVectorOfDigits()
 {
   vector<int> ret;
