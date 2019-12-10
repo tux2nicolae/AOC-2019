@@ -43,9 +43,9 @@ int main()
   auto pointsBeetweenThem = [&](int i1, int j1, int i2, int j2) -> int {
     int count = 0;
 
-    for (int i = (i1 <= i2 ? i1 : i2); i <= (i2 >= i1 ? i2 : i1); ++i)
+    for (int i = min(i1, i2); i <= max(i1, i2); ++i)
     {
-      for (int j = (j1 <= j2 ? j1 : j2); j <= (j2 >= j1 ? j2 : j1); ++j)
+      for (int j = min(j1, j2); j <= max(j1, j2); ++j)
       {
         if (m[i][j] != '#' || (i == i1 && j == j1) || (i == i2 && j == j2))
           continue;
