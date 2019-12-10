@@ -25,13 +25,146 @@ using namespace std;
 #include "../../AOCLib/src/Math.h"
 #include "../../AOCLib/src/Time.h"
 
+bool isCollinear(int x1, int y1, int x2, int y2, int x3, int y3)
+{
+  return (y3 - y2) * (x2 - x1) == (y2 - y1) * (x3 - x2);
+}
+
 int main()
 {
   ifstream in("..\\..\\Day10\\src\\Day10.in");
   ofstream out("..\\..\\Day10\\src\\Day10.out");
 
   FStreamReader reader(in);
-  auto v = reader.ReadVector();
-  
+  auto m = reader.ReadVectorOfWords();
+
+  vector<vector<int>> counts(1000, vector<int>(1000, 0));
+
+  auto pointsBeetweenThem = [&](int i1, int j1, int i2, int j2) -> int {
+    int count = 0;
+
+    for (int i = (i1 <= i2 ? i1 : i2); i <= (i2 >= i1 ? i2 : i1); ++i)
+    {
+      for (int j = (j1 <= j2 ? j1 : j2); j <= (j2 >= j1 ? j2 : j1); ++j)
+      {
+        if (m[i][j] != '#' || (i == i1 && j == j1) || (i == i2 && j == j2))
+          continue;
+
+        if (isCollinear(i1, j1, i, j, i2, j2))
+          count++;
+      }
+    }
+
+    return count;
+  };
+
+  for (int i1 = 0; i1 < m.size(); ++i1)
+  {
+    for (int j1 = 0; j1 < m[0].size(); ++j1)
+    {
+      if (m[i1][j1] != '#')
+        continue;
+
+      // check if exists
+      for (int i2 = 0; i2 < m.size(); ++i2)
+      {
+        for (int j2 = 0; j2 < m[0].size(); ++j2)
+        {
+          if (m[i2][j2] != '#' || (i1 == i2 && j1 == j2))
+            continue;
+
+          if (pointsBeetweenThem(i1, j1, i2, j2))
+            continue;
+
+          counts[i1][j1]++;
+        }
+      }
+    }
+  }
+
+  AOC::Point station;
+
+  // part 1
+  int best = 0;
+  for (int i = 0; i < m.size(); ++i)
+  {
+    for (int j = 0; j < m[0].size(); ++j)
+    {
+      if (counts[i][j] > best)
+      {
+        best = counts[i][j];
+        station = { i, j };
+      }
+    }
+  }
+
+  cout << best << endl;
+
+  // part 2
+  auto countAsteroidsToStation = [&]() {
+    vector<vector<int>> asteroidsToStation(1000, vector<int>(1000, 0));
+
+    for (int i = 0; i < m.size(); ++i)
+    {
+      for (int j = 0; j < m[0].size(); ++j)
+      {
+        if (m[i][j] != '#' || (station.x == i && station.y == j))
+          continue;
+
+        asteroidsToStation[i][j] = pointsBeetweenThem(i, j, station.x, station.y) + 1;
+      }
+    }
+
+    return asteroidsToStation;
+  };
+
+  auto asteroidsToStation = countAsteroidsToStation();
+
+  auto getOnes = [&]() {
+    vector<AOC::Point> ones;
+    for (int i = 0; i < m.size(); ++i)
+    {
+      for (int j = 0; j < m[0].size(); ++j)
+      {
+        if (m[i][j] != '#' || (i == station.x && j == station.y))
+        {
+          out << ((i == station.x && j == station.y) ? "X" : ".");
+          continue;
+        }
+
+        if (asteroidsToStation[i][j] == 1)
+        {
+          out << asteroidsToStation[i][j];
+          ones.push_back({ i,j });
+        }
+        else
+        {
+          out << ".";
+        }
+      }
+
+      out << endl;
+    }
+
+    return ones;
+  };
+
+
+  auto angle = [&](const AOC::Point& a)
+  {
+    AOC::Point translatedToOrigin{ a.x - station.x, a.y - station.y };
+
+    return atan2(translatedToOrigin.y, translatedToOrigin.x);
+  };
+
+  auto ones = getOnes();
+  std::sort(begin(ones), end(ones), [&](const AOC::Point & a, const AOC::Point & b) 
+    {
+      return angle(a) > angle(b);
+    });
+
+  auto ret = ones[200 - 1];
+  cout << ret.y * 100 + ret.x;
+
   return 0;
 }
