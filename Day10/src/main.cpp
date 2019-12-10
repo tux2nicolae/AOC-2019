@@ -101,26 +101,7 @@ int main()
   cout << best << endl;
 
   // part 2
-  auto countAsteroidsToStation = [&]() {
-    vector<vector<int>> asteroidsToStation(1000, vector<int>(1000, 0));
-
-    for (int i = 0; i < m.size(); ++i)
-    {
-      for (int j = 0; j < m[0].size(); ++j)
-      {
-        if (m[i][j] != '#' || (station.x == i && station.y == j))
-          continue;
-
-        asteroidsToStation[i][j] = pointsBeetweenThem(i, j, station.x, station.y) + 1;
-      }
-    }
-
-    return asteroidsToStation;
-  };
-
-  auto asteroidsToStation = countAsteroidsToStation();
-
-  auto getOnes = [&]() {
+  auto getDirectAsteroids = [&]() {
     vector<AOC::Point> ones;
     for (int i = 0; i < m.size(); ++i)
     {
@@ -132,9 +113,10 @@ int main()
           continue;
         }
 
-        if (asteroidsToStation[i][j] == 1)
+        auto pointsBeetween = pointsBeetweenThem(i, j, station.x, station.y);
+        if (pointsBeetween == 0)
         {
-          out << asteroidsToStation[i][j];
+          out << "#";
           ones.push_back({ i,j });
         }
         else
@@ -153,17 +135,16 @@ int main()
   auto angle = [&](const AOC::Point& a)
   {
     AOC::Point translatedToOrigin{ a.x - station.x, a.y - station.y };
-
     return atan2(translatedToOrigin.y, translatedToOrigin.x);
   };
 
-  auto ones = getOnes();
-  std::sort(begin(ones), end(ones), [&](const AOC::Point & a, const AOC::Point & b) 
+  auto asteroids = getDirectAsteroids();
+  std::sort(begin(asteroids), end(asteroids), [&](const AOC::Point & a, const AOC::Point & b)
     {
       return angle(a) > angle(b);
     });
 
-  auto ret = ones[200 - 1];
+  auto ret = asteroids[200 - 1];
   cout << ret.y * 100 + ret.x;
 
   return 0;
