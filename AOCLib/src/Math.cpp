@@ -20,7 +20,7 @@ int AOC::ManhattenDistance(const Point& a, const Point& b)
   return AOC::ManhattenDistance(a.x, a.y, b.x, b.y);
 }
 
-int AOC::Cmmdc(int n, int m)
+long long AOC::Cmmdc(long long n, long long m)
 {
   if (n == 0)
     return m;
@@ -28,7 +28,7 @@ int AOC::Cmmdc(int n, int m)
   return Cmmdc(m % n, n);
 }
 
-int AOC::Cmmmc(int n, int m)
+long long AOC::Cmmmc(long long n, long long m)
 {
   return (n * m) / Cmmdc(n, m);
 }

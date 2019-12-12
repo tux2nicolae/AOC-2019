@@ -27,6 +27,6 @@ namespace AOC
   int ManhattenDistance(int x1, int y1, int x2, int y2);
   int ManhattenDistance(const Point & a, const Point& b);
 
-  int Cmmdc(int n, int m);
-  int Cmmmc(int n, int m);
+  long long Cmmdc(long long n, long long m);
+  long long Cmmmc(long long n, long long m);
 }
