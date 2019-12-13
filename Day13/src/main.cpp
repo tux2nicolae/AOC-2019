@@ -27,15 +27,18 @@ using namespace std;
 
 using INT = long long;
 
-vector<vector<char>> m(1000, vector<char>(1000, ' '));
+vector<vector<char>> gameMap(1000, vector<char>(1000, ' '));
 
-int s = 0;
-struct Joystick
+struct Game
 {
-  int getPosition()
+  int blockCount{};
+
+  AOC::Point paddle;
+  AOC::Point ball;
+
+  int getJoystickPosition()
   {
-    AOC::Point paddle = getPaddlePosition();
-    AOC::Point ball = getBallPosition();
+    updateGameState();
 
     if (paddle.x < ball.x)
       return 1;
@@ -45,39 +48,50 @@ struct Joystick
       return -1;
   };
 
+  void setMapValue(AOC::Point pos, int tileId)
+  {
+    char tile = ' ';
+    switch (tileId)
+    {
+    case 0: tile = ' ';
+      break;
+    case 1: tile = 'W';
+      break;
+    case 2: tile = '#';
+      break;
+    case 3: tile = '|';
+      break;
+    case 4: tile = '*';
+      break;
+    }
+
+    gameMap[pos.x][pos.y] = tile;
+
+    maxX = max(maxX, pos.x);
+    maxY = max(maxY, pos.y);
+  }
+
 private:
 
-  AOC::Point getBallPosition()
+  int maxX{};
+  int maxY{};
+
+  void updateGameState()
   {
-    for (int i = 0; i < m.size(); ++i)
+    for (int i = 0; i <= maxX; ++i)
     {
-      for (int j = 0; j < m[i].size(); ++j)
+      for (int j = 0; j <= maxY; ++j)
       {
-        if (m[i][j] == '*')
-          return { i, j };
+        if (gameMap[i][j] == '*')
+          ball = { i, j };
+        else if (gameMap[i][j] == '|')
+          paddle = { i, j };
       }
     }
-
-    return { 0, 0 };
   }
-
-  AOC::Point getPaddlePosition()
-  {
-    for (int i = 0; i < m.size(); ++i)
-    {
-      for (int j = 0; j < m[i].size(); ++j)
-      {
-        if (m[i][j] == '|')
-          return { i, j };
-      }
-    }
-
-    return { 0, 0 };
-  }
-
 };
 
-Joystick joystick;
+Game game;
 
 class IntCodeComputer {
 public:
@@ -123,7 +137,7 @@ public:
       //
       else if (opcode == 3)
       {
-        INT value = joystick.getPosition();
+        INT value = game.getJoystickPosition();
 
         INT a = getOutputPos(aMode);
         memory[a] = value;
@@ -154,24 +168,9 @@ public:
           {
             // part 1
             if (titleId == 2)
-              s++;
+              game.blockCount++;
 
-            char tile = ' ';
-            switch(titleId)
-            {
-            case 0: tile = ' ';
-              break;
-            case 1: tile = 'W';
-              break;
-            case 2: tile = '#';
-              break;
-            case 3: tile = '|';
-              break;
-            case 4: tile = '*';
-              break;
-            }
-
-            m[outputPos.x][outputPos.y] = tile;
+            game.setMapValue(outputPos, titleId);
           }
         }
 
@@ -290,17 +289,18 @@ int main()
   vector<INT> input;
   computer.run(input);
 
+  cout << "Part1:" << game.blockCount;
+
+  // write final output map
   for (int i = 0; i < 45; ++i)
   {
     for (int j = 0; j < 24; ++j)
     {
-      out << m[i][j];
+      out << gameMap[i][j];
     }
 
     out << endl;
   }
-
-  cout << s;
 
   return 0;
 }
