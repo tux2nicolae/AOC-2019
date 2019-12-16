@@ -147,9 +147,44 @@ int AOC::RegexMatchInt(const string& str, const string& regexStr)
   return stoi(match[0]);
 }
 
+vector<vector<int>> AOC::MultiplyMatrix(const vector<vector<int>> & first, const vector<vector<int>> & second, int modulo)
+{
+  assert(first.size() != 0);
+  assert(first.size() == second.size());
+  assert(first[0].size() == second[0].size());
+
+  for (int i = 0; i < first.size(); ++i)
+  {
+    assert(first[i].size() == first[0].size());
+    assert(second[i].size() == first[0].size());
+  }
+
+  //------------------------------------------------------------------------
+
+  size_t matrixSize = first.size();
+  vector<vector<int>> temp;
+
+  temp.resize(matrixSize);
+  for (auto & row : temp)
+    row.resize(matrixSize);
+
+  for (int i = 0; i < matrixSize; i++)
+  {
+    for (int j = 0; j < matrixSize; j++)
+    {
+      for (int k = 0; k < matrixSize; k++)
+      {
+        temp[i][j] = ((((long long)first[i][k] * second[k][j]) % modulo) + temp[i][j]) % modulo;
+      }
+    }
+  }
+
+  return temp;
+}
+
 namespace AOC::detail
 {
-  vector<int> GetPartialSums(const vector<int> & sequence)
+  vector<int> GetPartialSums(const vector<int>& sequence)
   {
     vector<int> sums;
     sums.reserve(sequence.size());
@@ -158,41 +193,6 @@ namespace AOC::detail
       back_inserter(sums));
 
     return sums;
-  }
-
-  vector<vector<int>> MultiplyMatrix(const vector<vector<int>> & first, const vector<vector<int>> & second, int modulo)
-  {
-    assert(first.size() != 0);
-    assert(first.size() == second.size());
-    assert(first[0].size() == second[0].size());
-
-    for (int i = 0; i < first.size(); ++i)
-    {
-      assert(first[i].size() == first[0].size());
-      assert(second[i].size() == first[0].size());
-    }
-
-    //------------------------------------------------------------------------
-
-    size_t matrixSize = first.size();
-    vector<vector<int>> temp;
-
-    temp.resize(matrixSize);
-    for (auto & row : temp)
-      row.resize(matrixSize);
-
-    for (int i = 0; i < matrixSize; i++)
-    {
-      for (int j = 0; j < matrixSize; j++)
-      {
-        for (int k = 0; k < matrixSize; k++)
-        {
-          temp[i][j] = ((((long long)first[i][k] * second[k][j]) % modulo) + temp[i][j]) % modulo;
-        }
-      }
-    }
-
-    return temp;
   }
 
   vector<vector<int>> FibonaciMatrix(int n, int modulo)

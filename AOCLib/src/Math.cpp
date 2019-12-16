@@ -5,17 +5,17 @@
 #include "pch.h"
 #include "Math.h"
 
-int AOC::Abs(int number)
+long long AOC::Abs(long long number)
 {
   return number > 0 ? number : -number;
 }
 
-int AOC::ManhattenDistance(int x1, int y1, int x2, int y2)
+long long AOC::ManhattenDistance(int x1, int y1, int x2, int y2)
 {
   return Abs(x1 - x2) + Abs(y1 - y2);
 }
 
-int AOC::ManhattenDistance(const Point& a, const Point& b)
+long long AOC::ManhattenDistance(const Point& a, const Point& b)
 {
   return AOC::ManhattenDistance(a.x, a.y, b.x, b.y);
 }

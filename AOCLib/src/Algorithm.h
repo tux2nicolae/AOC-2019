@@ -18,15 +18,15 @@ namespace AOC
   vector<string> Explode(const string & str, char separator);
   int RegexMatchInt(const string& str, const string& regexStr = "(.*)");
 
+  vector<vector<int>> MultiplyMatrix(const vector<vector<int>>& first,
+    const vector<vector<int>>& second, int modulo);
+
   //--------------------------------------------------------------------------
   // implementation details
 
   namespace detail
   {
     vector<int> GetPartialSums(const vector<int> & sequence);
-
-    vector<vector<int>> MultiplyMatrix(const vector<vector<int>> & first, 
-      const vector<vector<int>> & second, int modulo);
 
     vector<vector<int>> FibonaciMatrix(int n, int modulo);
   }

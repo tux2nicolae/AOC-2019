@@ -22,10 +22,10 @@ namespace AOC
     };
   };
 
-  int Abs(int number);
+  long long Abs(long long number);
 
-  int ManhattenDistance(int x1, int y1, int x2, int y2);
-  int ManhattenDistance(const Point & a, const Point& b);
+  long long ManhattenDistance(int x1, int y1, int x2, int y2);
+  long long ManhattenDistance(const Point & a, const Point& b);
 
   long long Cmmdc(long long n, long long m);
   long long Cmmmc(long long n, long long m);
