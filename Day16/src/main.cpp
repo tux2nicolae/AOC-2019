@@ -32,21 +32,21 @@ vector<int> basePattern{ 0, 1, 0, -1 };
 // part 2
 const size_t kPhases = 100;
 const size_t kMultiplyInput = 10000;
-const size_t kSevenDigits = 303673;
+const size_t kSevenDigits = 5970927;
 
-int getRepeatingPatternValue(size_t linePos, size_t valuePos)
-{
-  linePos++;
-  size_t patternSize = (linePos * 4);
+// int getRepeatingPatternValue(size_t linePos, size_t valuePos)
+// {
+//   linePos++;
+//   size_t patternSize = (linePos * 4);
+// 
+//   size_t inPatternPos = (valuePos) % patternSize;
+//   size_t finalPos = ((inPatternPos + 1) % patternSize) / linePos;
+// 
+//   return basePattern[finalPos];
+// }
 
-  size_t inPatternPos = (valuePos) % patternSize;
-  size_t finalPos = ((inPatternPos + 1) % patternSize) / linePos;
-
-  return basePattern[finalPos];
-}
-
-long long getSum(const vector<int> & moonPhase, size_t size, size_t linePos)
-{
+// long long getSum(const vector<int> & moonPhase, size_t size, size_t linePos)
+// {
   // size_t patternSize = (linePos + 1) * 4;
 
   // size_t until = patternSize;
@@ -74,20 +74,33 @@ long long getSum(const vector<int> & moonPhase, size_t size, size_t linePos)
   //   return current;
   // });
 
-  long long sum = 0;
-  for (size_t j = max(linePos, kSevenDigits); j < size; ++j)
+  // long long sum = 0;
+  // for (size_t j = max(linePos, kSevenDigits); j < size; ++j)
+  // {
+  //   sum += moonPhase[j]; // *getRepeatingPatternValue(linePos, j);
+  // }
+  // 
+  // // cout << sum << " ";
+  // return sum;
+// }
+
+void runPhase(vector<int> & moonPhase, const size_t size)
+{
+  // initial line sum
+  int lineSum = 0;
+  for (size_t j = kSevenDigits; j < size; ++j)
   {
-     sum += moonPhase[j % moonPhase.size()] * getRepeatingPatternValue(linePos, j);
+    // all will be 1
+    lineSum += moonPhase[j]; // *getRepeatingPatternValue(linePos, j);
   }
 
-  return sum;
-}
 
-void runPhase(vector<int> & moonPhase, size_t size)
-{
   for (int i = kSevenDigits; i < size; ++i)
   {
-    moonPhase[i % moonPhase.size()] = AOC::Abs(getSum(moonPhase, size, i)) % 10;
+    int temp = moonPhase[i];
+
+    moonPhase[i] = lineSum % 10;
+    lineSum -= temp;
   }
 }
 
