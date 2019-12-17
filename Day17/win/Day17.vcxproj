@@ -138,6 +138,9 @@
     <None Include="..\src\Day17.in" />
     <None Include="..\src\Day17.out" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\robot.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
