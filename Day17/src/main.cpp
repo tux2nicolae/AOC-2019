@@ -31,9 +31,6 @@ using namespace std;
 
 #include "robot.h"
 
-const int kMaxI = 44;
-const int kMaxJ = 44;
-
 struct Space
 {
   bool continuousFeed = false;
@@ -67,26 +64,7 @@ struct Space
       reportJ = 0;
     }
   }
-
-  void reportPrint(char c)
-  {
-    assert(c != 0);
-    static int reportI = 0, reportJ = 0;
-
-    space[{reportI, reportJ++}] = c;
-    cout << c;
-
-    if (c == 10)
-    {
-      ++reportI;
-      reportJ = 0;
-    }
-
-    if (reportI > maxX)
-      reportI = 0;
-  }
-
-
+ 
   //------------------------------------------------------
 
   string calculatePath() {
@@ -272,11 +250,7 @@ public:
       else if (opcode == 4)
       {
         INT a = getValue(aMode);
-
-        // if (memory[0] == 1)
-          space.reportMap(a);
-        // else if(memory[0] == 2)
-        //   space.reportPrint(a);
+        space.reportMap(a);
       }
       else if (opcode == 5)
       {

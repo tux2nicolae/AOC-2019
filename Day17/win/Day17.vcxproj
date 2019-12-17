@@ -137,6 +137,7 @@
   <ItemGroup>
     <None Include="..\src\Day17.in" />
     <None Include="..\src\Day17.out" />
+    <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\robot.h" />
