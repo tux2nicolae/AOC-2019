@@ -17,7 +17,7 @@
     <None Include="..\src\Day17.out">
       <Filter>src</Filter>
     </None>
-    <None Include="Readme.md">
+    <None Include="..\src\README.md">
       <Filter>src</Filter>
     </None>
   </ItemGroup>
