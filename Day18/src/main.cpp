@@ -17,6 +17,7 @@
 #include <numeric>
 #include <assert.h>
 #include <queue>
+#include <bitset>
 
 using namespace std;
 
@@ -26,32 +27,15 @@ using namespace std;
 #include "../../AOCLib/src/Math.h"
 #include "../../AOCLib/src/Time.h"
 
-const int kChars = 16;
-const char kMaxLetterLower = 'p';
-const char kMaxLetter = 'P';
+const int kChars = 26;
+const char kMaxLetterLower = 'z';
+const char kMaxLetter = 'Z';
 
 AOC::Point initialPoint{ 0, 0 };
 std::map<char, AOC::Point> inputKeys{};
 std::map<char, AOC::Point> inputDoors{};
 
 //--------------------------------------------------------------
-
-struct Key
-{
-  char name;
-  int distance;
-  AOC::Point position{};
-
-  bool operator==(const Key& other) const
-  {
-    return name == other.name;
-  };
-
-  bool operator<(const Key& other) const
-  {
-    return distance < other.distance;
-  }
-};
 
 // char -> cost
 unordered_map<char, int> calculateDistance(const vector<string>& map, AOC::Point initialPoint, int initialCost)
@@ -96,7 +80,6 @@ unordered_map<char, int> calculateDistance(const vector<string>& map, AOC::Point
 
   return keyDistances;
 };
-
 
 // graph dependencies
 vector<char> calculateDependencies(const vector<string>& map, AOC::Point startPoint)
@@ -165,7 +148,7 @@ vector<char> calculateDependencies(const vector<string>& map, AOC::Point startPo
   return {};
 };
 
-void printMap(ofstream& out, const vector<string> & map, const set<Key> & keys)
+void printMap(ofstream& out, const vector<string> & map)
 {
   for (int i = 0; i < map.size(); i++)
   {
@@ -214,30 +197,17 @@ void printMap(ofstream& out, const vector<string> & map, const set<Key> & keys)
 unordered_map<char, vector<char>> graph;
 unordered_map<char, vector<char>> dependencyGraph;
 unordered_map<char, unordered_map<char, int>> distances;
+vector<char> dependenciesCount(kChars, 0);
 
-vector<bool> used(kChars, false);
-vector<int> dependenciesCount(kChars, 0);
+std::bitset<26> used;
+unordered_map<char, unordered_map<uint64_t, int>> cache;
 
-int minCost = numeric_limits<int>::max();
-vector<char> resultPath(kChars, 0);
-
-int minSum = numeric_limits<int>::max();
-
-int sum = 0;
-void backtrack(vector<string> & map, char keyName, int depth)
+int backtrack(vector<string> & map, char keyName, int depth)
 {
-  // print results
-  static long long testI = 0;
-  if (depth == kChars && (testI++ > 10000))
-  {
-    testI = 0;
-    for (auto c : resultPath)
-      cout << c;
+  if (depth == kChars)
+    return 0;
 
-    minSum = min(minSum, sum);
-    cout << " : " << minSum << endl;
-    return;
-  }
+  int minSum = numeric_limits<int>::max();
 
   for (char nextKeyName = 'A'; nextKeyName <= kMaxLetter; ++nextKeyName)
   {
@@ -246,23 +216,33 @@ void backtrack(vector<string> & map, char keyName, int depth)
 
     const auto& neighbors = dependencyGraph[nextKeyName];
 
-    // prepare
-    sum += distances.at(keyName).at(nextKeyName);
-
     used[nextKeyName - 'A'] = true;
     for (auto neighbor: neighbors)
       dependenciesCount[neighbor - 'A']--;
 
-    resultPath[depth] = nextKeyName;
-    backtrack(map, nextKeyName, depth + 1);
+    int subgraphSum = 0;
+
+    // find in cache
+    if (auto it = cache.find(nextKeyName); it != end(cache) 
+      && it->second.find(used.to_ullong()) != end(it->second))
+    {
+      subgraphSum = it->second.at(used.to_ullong());
+    }
+    else
+    {
+      subgraphSum = backtrack(map, nextKeyName, depth + 1);
+      cache[nextKeyName][used.to_ullong()] = subgraphSum;
+    }
+
+    minSum = min(minSum, subgraphSum + distances[keyName][nextKeyName]);
 
     // revert
-    sum -= distances.at(keyName).at(nextKeyName);
-
     used[nextKeyName - 'A'] = false;
     for (auto neighbor : neighbors)
       dependenciesCount[neighbor - 'A']++;
   }
+
+  return minSum;
 }
 
 int main()
@@ -273,6 +253,7 @@ int main()
   FStreamReader reader(in);
   auto map = reader.ReadVectorOfWords();
   
+  // read data
   for(int i = 0; i < map.size(); ++i)
   {
     for(int j = 0; j < map[0].size(); ++j)
@@ -294,12 +275,6 @@ int main()
   }
 
   //-----------------------------------------------------------------------
-
-  // compute graph
-  // for(char c = 'A' ; c <= 'Z'; c++)
-  //   dependenciesCount[c] = 0;
-
-  FStreamWriter writter(out);
   for (auto [keyName, keyPosition] : inputKeys)
   {
     out << keyName << "     |    ";
@@ -329,7 +304,7 @@ int main()
 
   //-----------------------------------------------------------------------
 
-  backtrack(map, '0', 0);
+  cout << backtrack(map, '0', 0);
 
   // printMap(out, map, keys);
   // cout << minCost;
