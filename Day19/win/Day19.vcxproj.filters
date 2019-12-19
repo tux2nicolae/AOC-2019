@@ -6,16 +6,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\main.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
+    <None Include="..\src\Day19.in" />
+    <None Include="..\src\Day19.out" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\Day19.in">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\Day19.out">
-      <Filter>src</Filter>
-    </None>
+    <ClCompile Include="..\src\main.cpp" />
   </ItemGroup>
 </Project>

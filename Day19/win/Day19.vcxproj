@@ -127,9 +127,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\AOCLib\win\AOCLib.vcxproj">
       <Project>{c1b79c31-d547-4397-8ff0-13502a8ed612}</Project>
     </ProjectReference>
@@ -137,6 +134,9 @@
   <ItemGroup>
     <None Include="..\src\Day19.in" />
     <None Include="..\src\Day19.out" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
