@@ -27,7 +27,6 @@ using namespace std;
 #include "../../AOCLib/src/Math.h"
 #include "../../AOCLib/src/Time.h"
 
-const char kMaxLetter = 'Z';
 
 struct Robot{
   char id{};
@@ -38,6 +37,9 @@ vector<Robot> robots;
 
 std::map<char, AOC::Point> inputKeys{};
 std::map<char, AOC::Point> inputDoors{};
+
+// optimization for backtracking algorithm
+char kMaxLetter = 'A';
 
 unordered_map<char, vector<char>> graph;
 unordered_map<char, vector<char>> dependencyGraph;
@@ -248,18 +250,20 @@ int main()
   {
     for(int j = 0; j < map[0].size(); ++j)
     {
-      if (map[i][j] == '@')
+      char c = map[i][j];
+      if (c == '@')
       {
         robots.push_back(Robot{ robotCharId++, AOC::Point{ i, j } });
-        map[i][j] = '.';
+        c = '.';
       }
-      else if ('a' <= map[i][j] && map[i][j] <= 'z')
+      else if ('a' <= c && c <= 'z')
       {
         inputKeys[map[i][j]] = { i, j };
+        kMaxLetter = std::max((int)kMaxLetter, toupper(c));
       }
-      else if ('A' <= map[i][j] && map[i][j] <= 'Z')
+      else if ('A' <= c && c <= 'Z')
       {
-        inputDoors[map[i][j]] = { i, j };
+        inputDoors[c] = { i, j };
       }
     }
   }
