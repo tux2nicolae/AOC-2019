@@ -31,7 +31,13 @@ const int kChars = 26;
 const char kMaxLetterLower = 'z';
 const char kMaxLetter = 'Z';
 
-AOC::Point initialPoint{ 0, 0 };
+struct Robot{
+  char id{};
+  AOC::Point position;
+};
+
+vector<Robot> robots;
+
 std::map<char, AOC::Point> inputKeys{};
 std::map<char, AOC::Point> inputDoors{};
 
@@ -100,7 +106,11 @@ vector<char> calculateDependencies(const vector<string>& map, AOC::Point startPo
     static const int directionY[4] = { 0,  1, 0, -1 };
 
     // found
-    if (from == initialPoint)
+    auto it = find_if(begin(robots), end(robots), [&](auto& robot) {
+      return robot.position == from;
+    });
+
+    if (it != end(robots))
     {
       vector<char> dependencies;
 
@@ -127,7 +137,6 @@ vector<char> calculateDependencies(const vector<string>& map, AOC::Point startPo
       return dependencies;
     }
 
-    //
     for (int i = 0; i < 4; ++i)
     {
       AOC::Point to;
@@ -202,27 +211,31 @@ vector<char> dependenciesCount(kChars, 0);
 std::bitset<26> used;
 unordered_map<char, unordered_map<uint64_t, int>> cache;
 
+int getKeyId(char keyName)
+{
+  return toupper(keyName) - 'A';
+}
+
 int backtrack(vector<string> & map, char keyName, int depth)
 {
   if (depth == kChars)
     return 0;
 
   int minSum = numeric_limits<int>::max();
-
   for (char nextKeyName = 'A'; nextKeyName <= kMaxLetter; ++nextKeyName)
   {
-    if (used[nextKeyName - 'A'] || dependenciesCount[nextKeyName - 'A'])
+    if (used[getKeyId(nextKeyName)] || dependenciesCount[getKeyId(nextKeyName)])
       continue;
 
     const auto& neighbors = dependencyGraph[nextKeyName];
 
-    used[nextKeyName - 'A'] = true;
+    // remove dependencies
+    used[getKeyId(nextKeyName)] = true;
     for (auto neighbor: neighbors)
-      dependenciesCount[neighbor - 'A']--;
-
-    int subgraphSum = 0;
+      dependenciesCount[getKeyId(neighbor)]--;
 
     // find in cache
+    int subgraphSum = 0;
     if (auto it = cache.find(nextKeyName); it != end(cache) 
       && it->second.find(used.to_ullong()) != end(it->second))
     {
@@ -236,10 +249,10 @@ int backtrack(vector<string> & map, char keyName, int depth)
 
     minSum = min(minSum, subgraphSum + distances[keyName][nextKeyName]);
 
-    // revert
-    used[nextKeyName - 'A'] = false;
+    // add dependencies back
+    used[getKeyId(nextKeyName)] = false;
     for (auto neighbor : neighbors)
-      dependenciesCount[neighbor - 'A']++;
+      dependenciesCount[getKeyId(neighbor)]++;
   }
 
   return minSum;
@@ -253,14 +266,17 @@ int main()
   FStreamReader reader(in);
   auto map = reader.ReadVectorOfWords();
   
+  //-----------------------------------------------------------------------
   // read data
+
+  char robotCharId = '0';
   for(int i = 0; i < map.size(); ++i)
   {
     for(int j = 0; j < map[0].size(); ++j)
     {
       if (map[i][j] == '@')
       {
-        initialPoint = { i, j };
+        robots.push_back(Robot{ robotCharId++, AOC::Point{ i, j } });
         map[i][j] = '.';
       }
       else if ('a' <= map[i][j] && map[i][j] <= 'z')
@@ -275,14 +291,16 @@ int main()
   }
 
   //-----------------------------------------------------------------------
+  // calculate dependencies
+
   for (auto [keyName, keyPosition] : inputKeys)
   {
-    out << keyName << "     |    ";
+    out << keyName << "     |     ";
 
     vector<char> dependencies = calculateDependencies(map, keyPosition);
     for (const auto& dependecy : dependencies)
     {
-      dependenciesCount[toupper(keyName) - 'A']++;
+      dependenciesCount[getKeyId(keyName)]++;
       graph[toupper(keyName)].push_back(toupper(dependecy));
       dependencyGraph[toupper(dependecy)].push_back(toupper(keyName));
 
@@ -293,18 +311,25 @@ int main()
   }
 
   //-----------------------------------------------------------------------
+  // calculate distances
+  
+  // distances from eacth robot
 
+  for(auto [robotId, robotPosition] : robots)
+  {
+    distances[robotId] = calculateDistance(map, robotPosition, 0);
+  }
 
-  distances['0'] = calculateDistance(map, initialPoint, 0);
+  // distances between each key
   for (auto [keyName, keyPosition] : inputKeys)
   {
     distances[toupper(keyName)] = (calculateDistance(map, keyPosition, 0));
   }
 
-
   //-----------------------------------------------------------------------
+  // run backtracking
 
-  cout << backtrack(map, '0', 0);
+  cout << backtrack(map, robots[0].id , 0);
 
   // printMap(out, map, keys);
   // cout << minCost;
