@@ -27,8 +27,6 @@ using namespace std;
 #include "../../AOCLib/src/Math.h"
 #include "../../AOCLib/src/Time.h"
 
-const int kChars = 26;
-const char kMaxLetterLower = 'z';
 const char kMaxLetter = 'Z';
 
 struct Robot{
@@ -40,6 +38,13 @@ vector<Robot> robots;
 
 std::map<char, AOC::Point> inputKeys{};
 std::map<char, AOC::Point> inputDoors{};
+
+unordered_map<char, vector<char>> graph;
+unordered_map<char, vector<char>> dependencyGraph;
+unordered_map<char, unordered_map<char, int>> distances;
+
+std::bitset<26> used;
+vector<char> dependenciesCount(26, 0);
 
 //--------------------------------------------------------------
 
@@ -74,7 +79,7 @@ unordered_map<char, int> calculateDistance(const vector<string>& map, AOC::Point
       if (c == '#' || distances.find(to) != end(distances))
         continue;
       
-      if ('a' <= c && c <= kMaxLetterLower)
+      if ('a' <= c && c <= tolower(kMaxLetter))
       {
         keyDistances[toupper(c)] = distances[from] + 1;
       }
@@ -157,68 +162,15 @@ vector<char> calculateDependencies(const vector<string>& map, AOC::Point startPo
   return {};
 };
 
-void printMap(ofstream& out, const vector<string> & map)
-{
-  for (int i = 0; i < map.size(); i++)
-  {
-    for (int j = 0; j < map[0].size(); j++)
-    {
-      char c = map[i][j];
-      if ('a' <= c && c <= 'z'/* && find(begin(keys), end(keys), Key{ c }) != end(keys)*/)
-      {
-        //out << map[i][j];
-        out << c;
-        continue;
-      }
-
-      if ('A' <= c && c <= 'Z' /*&& find(begin(keys), end(keys), Key{ char(tolower(c)) }) != end(keys)*/)
-      {
-        //out << map[i][j];
-        out << c;
-        continue;
-      }
-
-      if ('a' <= c && c <= 'z')
-      {
-        out << "*";
-        continue;
-      }
-
-      if ('A' <= c && c <= 'Z' )
-      {
-        out << "#";
-        continue;
-      }
-
-      if (c == '#')
-      {
-        out << ".";
-        continue;
-      }
-
-      out << ' ';
-    }
-
-    out << endl;
-  }
-}
-
-unordered_map<char, vector<char>> graph;
-unordered_map<char, vector<char>> dependencyGraph;
-unordered_map<char, unordered_map<char, int>> distances;
-vector<char> dependenciesCount(kChars, 0);
-
-std::bitset<26> used;
-unordered_map<char, unordered_map<uint64_t, int>> cache;
-
 int getKeyId(char keyName)
 {
   return toupper(keyName) - 'A';
 }
 
-int backtrack(vector<string> & map, char keyName, int depth)
+unordered_map<string, unordered_map<uint64_t, int>> cache;
+int backtracking(vector<string> & map, const vector<char> & robots, size_t lettersCount)
 {
-  if (depth == kChars)
+  if (lettersCount == 0)
     return 0;
 
   int minSum = numeric_limits<int>::max();
@@ -227,6 +179,21 @@ int backtrack(vector<string> & map, char keyName, int depth)
     if (used[getKeyId(nextKeyName)] || dependenciesCount[getKeyId(nextKeyName)])
       continue;
 
+    auto getRobotIndex = [&]() -> int {
+      for (int i = 0; i < robots.size(); ++i)
+      {
+        auto robot = robots[i];
+        if (distances[robot][nextKeyName])
+          return i;
+      }
+
+      assert(false);
+      return -1;
+    };
+
+    const int robotIndex = getRobotIndex();
+    const int robotId = robots[robotIndex];
+
     const auto& neighbors = dependencyGraph[nextKeyName];
 
     // remove dependencies
@@ -234,20 +201,27 @@ int backtrack(vector<string> & map, char keyName, int depth)
     for (auto neighbor: neighbors)
       dependenciesCount[getKeyId(neighbor)]--;
 
+    vector<char> nextRobots = robots;
+    nextRobots[robotIndex] = nextKeyName;
+
+    auto robotsHash = reduce(begin(nextRobots), end(nextRobots), string(), [](auto current, auto& val) {
+      return current + val;
+    });
+
     // find in cache
     int subgraphSum = 0;
-    if (auto it = cache.find(nextKeyName); it != end(cache) 
+    if (auto it = cache.find(robotsHash); it != end(cache) 
       && it->second.find(used.to_ullong()) != end(it->second))
     {
       subgraphSum = it->second.at(used.to_ullong());
     }
     else
     {
-      subgraphSum = backtrack(map, nextKeyName, depth + 1);
-      cache[nextKeyName][used.to_ullong()] = subgraphSum;
+      subgraphSum = backtracking(map, nextRobots, lettersCount - 1);
+      cache[robotsHash][used.to_ullong()] = subgraphSum;
     }
 
-    minSum = min(minSum, subgraphSum + distances[keyName][nextKeyName]);
+    minSum = min(minSum, subgraphSum + distances[robotId][nextKeyName]);
 
     // add dependencies back
     used[getKeyId(nextKeyName)] = false;
@@ -329,7 +303,10 @@ int main()
   //-----------------------------------------------------------------------
   // run backtracking
 
-  cout << backtrack(map, robots[0].id , 0);
+  vector<char> robotsIds;
+  transform(begin(robots), end(robots), back_inserter(robotsIds), [](auto& robot) { return robot.id; });
+
+  cout << backtracking(map, robotsIds, inputKeys.size());
 
   // printMap(out, map, keys);
   // cout << minCost;
