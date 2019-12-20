@@ -46,9 +46,17 @@ bool isUpperLetter(char c)
   return 'A' <= c && c <= 'Z';
 }
 
+bool isPortal(AOC::Point portal)
+{
+  return portalTypes.find(portal) != end(portalTypes);
+}
+
 bool isInnerPortal(AOC::Point portal)
 {
-  return portal.x > 1 && portal.y > 1 && portal.x < (m.size() - 1) && (m[0].size() - 1);
+  return portal.x > 1 
+    && portal.y > 1 
+    && portal.x < (m.size() - 2) 
+    && portal.y < (m[0].size() - 2);
 }
 
 string readPortal(const vector<string>& m, AOC::Point from)
@@ -180,7 +188,7 @@ int main()
     auto current = heap.top();
     heap.pop();
 
-    if (current.level == 0 && current.value == exit)
+    if (current.value == exit)
     {
       cout << costs[current.value][current.level].cost - 1;
       break;
@@ -190,14 +198,43 @@ int main()
 
     for (auto& neighbour : graph[current.value])
     {
-      if (visited[neighbour.position][current.level])
+      if (neighbour.position == exit && current.level != 0)
+      {
+        continue;
+      }
+
+      // adjust level
+      int neightbourLevel = current.level;
+      if (isPortal(current.value) && isPortal(neighbour.position))
+      {
+        if (isInnerPortal(neighbour.position))
+          neightbourLevel--;
+        else
+          neightbourLevel++;
+      }
+
+      // skip outer portals on level 0
+      if (isPortal(neighbour.position) && !isInnerPortal(neighbour.position) && neightbourLevel <= 0)
         continue;
 
-      if (costs[neighbour.position][current.level].cost > costs[current.value][current.level].cost + neighbour.cost)
+      if (visited[neighbour.position][neightbourLevel])
+        continue;
+
+      // diferent levels
+      if (isPortal(current.value) && isPortal(neighbour.position))
       {
-        costs[neighbour.position][current.level] = Cost{costs[current.value][current.level].cost + neighbour.cost};
-        heap.push(ID{ neighbour.position, current.level });
+        costs[neighbour.position][neightbourLevel] = Cost{ costs[current.value][current.level].cost + neighbour.cost };
       }
+      // same level
+      else
+      {
+        if (costs[neighbour.position][neightbourLevel].cost > costs[current.value][neightbourLevel].cost + neighbour.cost)
+        {
+          costs[neighbour.position][neightbourLevel] = Cost{ costs[current.value][neightbourLevel].cost + neighbour.cost };
+        }
+      }
+          
+      heap.push(ID{ neighbour.position, neightbourLevel });
     }
   }
 
