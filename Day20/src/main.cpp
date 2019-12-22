@@ -29,11 +29,20 @@ using namespace std;
 #include "../../AOCLib/src/Math.h"
 #include "../../AOCLib/src/Time.h"
 
-
 // part 1
 //
 // NOT A T
 // NOT C J
+// OR T J
+// AND D J
+
+// part 2
+//
+// NOT C T
+// AND H T
+// NOT B J
+// OR T J
+// NOT A T
 // OR T J
 // AND D J
 
