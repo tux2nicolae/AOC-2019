@@ -175,10 +175,65 @@ vector<Operation> readOperations(const vector<string>& v)
 int n = 0;
 unordered_map<long long, bool> exists;
 
+// @return multiplication matrix
+vector<vector<long long>> getMultiplicationMatrix(long long n, long long modulo)
+{
+	// kDeckSize = 119315717514047
+	// f(0) = 2020
+	// f(x) = (93762728371954 + 64091301669138 * f(x - 1)) % kDeckSize;
+
+	// 2020
+	// 0 -> 2020
+	// 1 -> 100638597289719
+	// 2 -> 72218748140643
+	// 3 -> 104303908009190
+
+	// | a 1 |    | 20 0 |
+	// | 0 1 | 	  | b  0 |
+
+	static const long long a = 64091301669138;
+	static const long long b = 93762728371954;
+
+	static const vector<vector<long long>> kMatrix{ {a, 1}, {0, 1} };
+
+	if (n == 0)
+	{
+		// unity matrix
+		return { {1, 0}, {0, 1} };
+	}
+	else if (n == 1)
+	{
+		return kMatrix;
+	}
+
+	auto result = getMultiplicationMatrix(n / 2, modulo);
+	if (n % 2 == 0)
+	{
+		return AOC::MultiplyMatrix(result, result, modulo);
+	}
+	else
+	{
+		return AOC::MultiplyMatrix(AOC::MultiplyMatrix(result, result, modulo), kMatrix, modulo);
+	}
+}
+
+long long runPositionMath(long long from, long long iterations, long long modulo)
+{
+	static const long long a = 64091301669138;
+	static const long long b = 93762728371954;
+
+	auto multiplicationMatrix = getMultiplicationMatrix(iterations, modulo);
+
+	auto resultMatrix = AOC::MultiplyMatrix(multiplicationMatrix, { {from, 0}, {b, 0} }, modulo);
+	return resultMatrix[0][0];
+}
+
 long long runPosition(ostream& out, const vector<Operation>& operations, long long position, long long iterations)
 {
 	for (long long i = 0; i < iterations; ++i)
 	{
+		string str = "x";
+
 		// run operations
 		for (auto& operation : operations)
 		{
@@ -186,25 +241,40 @@ long long runPosition(ostream& out, const vector<Operation>& operations, long lo
 			{
 			case Operation::Type::ROTATE:
 			{
+				long long initialPosition = position;
+
 				long long rotatePosition = getCutPosition(operation.value);
 				position = ((position + kDeckSize) - rotatePosition) % kDeckSize;
+
+				str = str + "+" + to_string((position - initialPosition));
 			}
 			break;
 			case Operation::Type::REVERSE:
 			{
+				long long initialPosition = position;
+
 				position = getReversePosition(position);
+
+				str = to_string(kDeckSize) + "-(" + str + ")";
 			}
 			break;
 			case Operation::Type::INCREMENT:
 			{
+				long long initialPosition = position;
+
 				position = getNextIncrementPosition(position, operation.value);
+				str = "(" + str + ")*" + to_string(operation.value);
 			};
 			break;
 			}
 
 		}
 
-		out << position << endl;
+		out << str;
+
+		out << endl;
+
+		// out << position << endl;
 
 		if (exists[position])
 			cout << "EVRICA!!! : " << i << " : " << ++n << endl;
@@ -218,8 +288,8 @@ long long runPosition(ostream& out, const vector<Operation>& operations, long lo
 
 int main()
 {
-	ifstream in("..\\..\\Day21\\src\\Day21.in");
-	ofstream out("..\\..\\Day21\\src\\Day21.out");
+	ifstream in("..\\..\\Day22\\src\\Day22.in");
+	ofstream out("..\\..\\Day22\\src\\Day22.out");
 
 	FStreamReader reader(in);
 	auto v = reader.ReadVectorOfWords();
@@ -230,20 +300,27 @@ int main()
 
 	for (int i = 0; i < 1; ++i)
 	{
-		long long newPosition = runPosition(out, operations, 2020, 10);
+		long long newPosition = runPosition(out, operations, 2020, 3);
 		out << endl;
 		// out << newPosition << endl;
 	}
 
-	cout << 100638597289719 - 72218748140643 << endl;
-	cout << 72218748140643 - 104303908009190 << endl;
-	cout << 104303908009190 - 100246725387438 << endl;
-	cout << 100246725387438 - 10897014506395 << endl;
-	cout << 10897014506395 - 2007130324474 << endl;
-	cout << 2007130324474 - 45892765961820 << endl;
-	cout << 45892765961820 - 5777744825668 << endl;
-	cout << 5777744825668 - 37318630879371 << endl;
-	cout << 37318630879371 - 56681511722340 << endl;
+    // f((119315717514047 - 1) - 101741582076661) = f(17574135437385) = ???
+	long long ret = runPositionMath(2020, 17574135437385, 119315717514047);
+
+	// test
+	cout << ret << endl;
+	cout << runPositionMath(ret, 101741582076661, 119315717514047) << endl;
+
+	// cout << 100638597289719 - 72218748140643 << endl;
+	// cout << 72218748140643 - 104303908009190 << endl;
+	// cout << 104303908009190 - 100246725387438 << endl;
+	// cout << 100246725387438 - 10897014506395 << endl;
+	// cout << 10897014506395 - 2007130324474 << endl;
+	// cout << 2007130324474 - 45892765961820 << endl;
+	// cout << 45892765961820 - 5777744825668 << endl;
+	// cout << 5777744825668 - 37318630879371 << endl;
+	// cout << 37318630879371 - 56681511722340 << endl;
 
 	// cout << "-----------------" << endl;
 	// 

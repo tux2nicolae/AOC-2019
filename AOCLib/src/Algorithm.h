@@ -8,7 +8,7 @@ namespace AOC
 {
   struct Point;
 
-  int Fibonaci(int n, int modulo);
+  long long Fibonaci(long long n, long long modulo);
   vector<bool> Eratosthenes(size_t n);
 
   pair<vector<vector<int>>, set<int>> Lee(const vector<Point> & aCoordonates, vector<vector<int>> & aMap);
@@ -18,8 +18,9 @@ namespace AOC
   vector<string> Explode(const string & str, char separator);
   int RegexMatchInt(const string& str, const string& regexStr = "(.*)");
 
-  vector<vector<int>> MultiplyMatrix(const vector<vector<int>>& first,
-    const vector<vector<int>>& second, int modulo);
+  long long MultiplyModulo(long long a, long long b, long long modulo);
+  vector<vector<long long>> MultiplyMatrix(const vector<vector<long long>>& first,
+    const vector<vector<long long>>& second, long long modulo);
 
   //--------------------------------------------------------------------------
   // implementation details
@@ -28,6 +29,6 @@ namespace AOC
   {
     vector<int> GetPartialSums(const vector<int> & sequence);
 
-    vector<vector<int>> FibonaciMatrix(int n, int modulo);
+    vector<vector<long long>> FibonaciMatrix(long long n, long long modulo);
   }
 }

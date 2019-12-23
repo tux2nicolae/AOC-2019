@@ -216,8 +216,8 @@ private:
 
 int main()
 {
-	ifstream in("..\\..\\Day20\\src\\Day20.in");
-	ofstream out("..\\..\\Day20\\src\\Day20.out");
+	ifstream in("..\\..\\Day21\\src\\Day21.in");
+	ofstream out("..\\..\\Day21\\src\\Day21.out");
 
 	FStreamReader reader(in);
 

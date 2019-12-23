@@ -6,7 +6,7 @@
 #include "Algorithm.h"
 #include "Math.h"
 
-int AOC::Fibonaci(int n, int modulo)
+long long AOC::Fibonaci(long long n, long long modulo)
 {
   if (n == 0)
     return 0;
@@ -147,7 +147,25 @@ int AOC::RegexMatchInt(const string& str, const string& regexStr)
   return stoi(match[0]);
 }
 
-vector<vector<int>> AOC::MultiplyMatrix(const vector<vector<int>> & first, const vector<vector<int>> & second, int modulo)
+long long AOC::MultiplyModulo(long long a, long long b, long long modulo)
+{
+	long long res = 0;
+
+	a %= modulo;
+
+	while (b)
+	{
+		if (b % 2 == 1)
+			res = (res + a) % modulo;
+
+		a = (2 * a) % modulo;
+		b = b / 2;
+	}
+
+	return res;
+}
+
+vector<vector<long long>> AOC::MultiplyMatrix(const vector<vector<long long>> & first, const vector<vector<long long>> & second, long long modulo)
 {
   assert(first.size() != 0);
   assert(first.size() == second.size());
@@ -162,7 +180,7 @@ vector<vector<int>> AOC::MultiplyMatrix(const vector<vector<int>> & first, const
   //------------------------------------------------------------------------
 
   size_t matrixSize = first.size();
-  vector<vector<int>> temp;
+  vector<vector<long long>> temp;
 
   temp.resize(matrixSize);
   for (auto & row : temp)
@@ -174,7 +192,7 @@ vector<vector<int>> AOC::MultiplyMatrix(const vector<vector<int>> & first, const
     {
       for (int k = 0; k < matrixSize; k++)
       {
-        temp[i][j] = ((((long long)first[i][k] * second[k][j]) % modulo) + temp[i][j]) % modulo;
+        temp[i][j] = (MultiplyModulo(first[i][k], second[k][j], modulo) + temp[i][j]) % modulo;
       }
     }
   }
@@ -195,9 +213,9 @@ namespace AOC::detail
     return sums;
   }
 
-  vector<vector<int>> FibonaciMatrix(int n, int modulo)
+  vector<vector<long long>> FibonaciMatrix(long long n, long long modulo)
   {
-    static const vector<vector<int>> kFibonaci{ {0, 1}, {1, 1} };
+    static const vector<vector<long long>> kFibonaci{ {0, 1}, {1, 1} };
 
     if (n == 0)
     {

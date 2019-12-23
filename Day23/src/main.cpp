@@ -375,8 +375,8 @@ void IntCodeComputer::SendToNat(Packet packet)
 
 int main()
 {
-	ifstream in("..\\..\\Day22\\src\\Day22.in");
-	ofstream out("..\\..\\Day22\\src\\Day22.out");
+	ifstream in("..\\..\\Day23\\src\\Day23.in");
+	ofstream out("..\\..\\Day23\\src\\Day23.out");
 
 	FStreamReader reader(in);
 
