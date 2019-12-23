@@ -30,6 +30,8 @@ int main()
 	ifstream in("..\\..\\Day20\\src\\Day20.in");
 	ofstream out("..\\..\\Day20\\src\\Day20.out");
 
+	// forgot to commit from work pc, right now i'm outside the country, will commit when will return to work
+
 	FStreamReader reader(in);
 	auto v = reader.ReadVector();
 
