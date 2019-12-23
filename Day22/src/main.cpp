@@ -15,9 +15,6 @@
 #include <unordered_map>
 #include <optional>
 #include <numeric>
-#include <queue>
-#include <thread>
-#include <mutex>
 #include <assert.h>
 
 using namespace std;
@@ -28,388 +25,280 @@ using namespace std;
 #include "../../AOCLib/src/Math.h"
 #include "../../AOCLib/src/Time.h"
 
+const long long kDeckSize = 119315717514047;
+const long long kTestIterations = 1;
 
-using INT = long long;
-
-struct Packet
+struct Operation
 {
-	long long x{};
-	long long y{};
-
-	bool operator<(const Packet& second) const
-	{
-		return tie(x, y) < tie(second.x, second.y);
-	};
-};
-
-struct NetworkQueue
-{
-	bool IsEmpty()
-	{
-		scoped_lock<mutex> lock(mQueueMutex);
-		return mQueue.empty();
-	}
-
-	optional<Packet> GetPacket()
-	{
-		scoped_lock<mutex> lock(mQueueMutex);
-
-		if (mQueue.empty())
-			return nullopt;
-
-		auto inputValue = mQueue.front();
-		mQueue.pop();
-
-		return inputValue;
+	enum class Type {
+		ROTATE,
+		REVERSE,
+		INCREMENT,
 	};
 
-	void AddPacket(Packet packet)
-	{
-		scoped_lock<mutex> lock(mQueueMutex);
-		mQueue.push(packet);
-	}
-
-private:
-	std::mutex mQueueMutex;
-	std::queue<Packet> mQueue;
-};
-
-struct NAT;
-
-class IntCodeComputer {
-public:
-	IntCodeComputer(const vector<INT>& memory, NAT & nat)
-		: memory(memory),
-		  nat(nat)
-	{
-	}
-
-	IntCodeComputer(IntCodeComputer&&) = default;
-	IntCodeComputer(const IntCodeComputer&) = delete;
-
-	bool booted = false;
-	INT inputMode = 0;
-	vector<long long> outputs;
-
-	int iddleCheck = 0;
-
-	bool run(INT computerID)
-	{
-		if (iddleCheck == 1000)
-			this_thread::sleep_for(100ms);
-
-		Packet lastPacket{};
-
-		while (true)
-		{
-			INT opcode = memory[++i] % 100;
-			if (opcode == 99)
-			{
-				return true;
-			}
-
-			assert(opcode > 0);
-
-			INT aMode = (memory[i] / 100) % 10;
-			INT bMode = (memory[i] / 1000) % 10;
-			INT cMode = (memory[i] / 10000) % 10;
-
-			if (opcode == 1)
-			{
-				INT a = getValue(aMode);
-				INT b = getValue(bMode);
-
-				INT c = getOutputPos(cMode);
-				memory[c] = a + b;
-			}
-			else if (opcode == 2)
-			{
-				INT a = getValue(aMode);
-				INT b = getValue(bMode);
-
-				INT c = getOutputPos(cMode);
-				memory[c] = a * b;
-			}
-
-			// input
-			else if (opcode == 3)
-			{
-				INT value = 0;
-				if (!booted)
-				{
-					value = computerID;
-					booted = true;
-				}
-				else
-				{
-					if (inputMode == 0)
-					{
-						auto nextPacket = mInputQueue.GetPacket();
-						if (!nextPacket)
-						{
-							iddleCheck = min(1000, iddleCheck + 1);
-							value = -1;
-						}
-						else
-						{
-							iddleCheck = 0;
-
-							lastPacket = *nextPacket;
-							value = lastPacket.x;
-							inputMode = 1;
-						}
-					} 
-					else if (inputMode == 1)
-					{
-						value = lastPacket.y;
-						inputMode = 0;
-					}
-					else
-					{
-						assert(false);
-					}
-				}
-
-				INT a = getOutputPos(aMode);
-				memory[a] = value;
-			}
-			// output
-			else if (opcode == 4)
-			{
-				iddleCheck = 0;
-
-				INT a = getValue(aMode);
-				outputs.push_back(a);
-
-				if (outputs.size() == 3)
-				{
-					Packet packet{outputs[1], outputs[2]};
-
-					// send to nat
-					if (outputs[0] == 255)
-					{
-						SendToNat(packet);
-					}
-					// send to other workers
-					else
-					{
-						(*networkSpace)[outputs[0]]->sendPacket(packet);
-					}
-
-					outputs.clear();
-				}
-			}
-			else if (opcode == 5)
-			{
-				INT a = getValue(aMode);
-				INT b = getValue(bMode);
-
-				if (a)
-					i = b - 1;
-			}
-			else if (opcode == 6)
-			{
-				INT a = getValue(aMode);
-				INT b = getValue(bMode);
-
-				if (!a)
-					i = b - 1;
-			}
-			else if (opcode == 7)
-			{
-				INT a = getValue(aMode);
-				INT b = getValue(bMode);
-
-
-				INT c = getOutputPos(cMode);
-				memory[c] = a < b;
-			}
-			else if (opcode == 8)
-			{
-				INT a = getValue(aMode);
-				INT b = getValue(bMode);
-
-				INT c = getOutputPos(cMode);
-				memory[c] = a == b;
-			}
-			else if (opcode == 9)
-			{
-				INT a = getValue(aMode);
-				mRelativeBase += a;
-			}
-		}
-
-		return true;
-	}
-
-	INT GetOutput() {
-		return mOutput;
-	};
-
-	void sendPacket(Packet packet)
-	{
-		mInputQueue.AddPacket(packet);
-	}
-
-	void setNetworkSpace(vector<unique_ptr<IntCodeComputer>>* networkSpace)
-	{
-		this->networkSpace = networkSpace;
-	}
-
-	bool isIddle()
-	{
-		return mInputQueue.IsEmpty() && iddleCheck >= 1000;
-	}
-
-	void SendToNat(Packet packet);
-
-private:
-	// address pointer
-	INT i{ -1 };
-
-	// memory
-	vector<INT> memory;
-
-	// output
-	INT mOutput{ 0 };
-
-	// relative base
-	INT mRelativeBase{ 0 };
-
-	NAT& nat;
-	NetworkQueue mInputQueue;
-	vector<unique_ptr<IntCodeComputer>>* networkSpace{};
-
-	//---------------------------------------
-
-	INT getValue(INT mode)
-	{
-		if (mode == 0)
-		{
-			size_t pos = memory[++i];
-			return memory[pos];
-		}
-		else if (mode == 1)
-		{
-			return memory[++i];
-		}
-		else if (mode == 2)
-		{
-			return memory[memory[++i] + mRelativeBase];
-		}
-
-		return 0;
-	}
-
-	INT getOutputPos(INT mode)
-	{
-		if (mode == 0)
-			return memory[++i];
-		if (mode == 2)
-			return memory[++i] + mRelativeBase;
-
-		assert(mode != 1);
-		return 0;
-	}
+	Type type;
+	long long value{};
 };
 
 
-struct NAT
+long long getCutPosition(long long cut)
 {
-	void setNetworkSpace(vector<unique_ptr<IntCodeComputer>>* networkSpace)
+	return (kDeckSize + cut) % kDeckSize;
+}
+
+long long getReversePosition(long long from)
+{
+	return (kDeckSize - from % kDeckSize) - 1;
+}
+
+long long getNextIncrementPosition(long long from, long long increment)
+{
+	return (from * increment) % kDeckSize;
+}
+
+vector<long long> dealWithIncrement(const vector<long long>& deck, long long n)
+{
+	long long popTop{ 0 };
+	vector<long long> newDeck(kDeckSize, 0);
+
+	for (long long i = 0; i < deck.size(); i++)
 	{
-		this->networkSpace = networkSpace;
+		newDeck[getNextIncrementPosition(i, n)] = deck[i];
 	}
 
-	void SetPacket(Packet packet)
+	return newDeck;
+}
+
+vector<long long> dealWithNewStack(const vector<long long>& deck)
+{
+	long long popTop{ 0 };
+	vector<long long> newDeck(deck.size(), 0);
+
+	for (long long i = 0; i < deck.size(); i++)
 	{
-		scoped_lock<mutex> lock(mLastPacketMutex);
-		mLastPacket = packet;
+		newDeck[getReversePosition(i)] = deck[i];
 	}
 
-	void run()
+	return newDeck;
+}
+
+void part1(const vector<string>& v)
+{
+	vector<long long> deck(kDeckSize, 0);
+	std::iota(deck.begin(), deck.end(), 0);
+
+	for (auto& s : v)
 	{
-		while (true)
+		stringstream ss(s);
+
+		string word;
+		ss >> word;
+
+		if (word == "cut")
 		{
-			bool allIddle = true;
-			for (auto& computer : *networkSpace)
+			long long n{};
+			ss >> n;
+
+			long long rotatePosition = getCutPosition(n);
+			rotate(begin(deck), begin(deck) + rotatePosition, end(deck));
+		}
+		else
+		{
+			string nextWord;
+			ss >> nextWord;
+			if (nextWord == "into")
 			{
-				allIddle = allIddle && computer->isIddle();
-				if (!allIddle)
-					break;
+				deck = dealWithNewStack(deck);
 			}
-
-			if (allIddle)
+			else
 			{
-				scoped_lock<mutex> lock(mLastPacketMutex);
+				ss >> nextWord;
 
-				if (send[mLastPacket])
-				{
-					cout << "Last packet y:" << mLastPacket.y;
-					return;
-				}
+				long long n{};
+				ss >> n;
 
-				cout << "Packet send y:" << mLastPacket.y << endl;
-
-				send[mLastPacket] = true;
-				(*networkSpace)[0]->sendPacket(mLastPacket);
+				deck = dealWithIncrement(deck, n);
 			}
-
-			this_thread::sleep_for(100ms);
 		}
 	}
 
-private:
-	std::mutex mLastPacketMutex;
-	Packet mLastPacket;
+	auto it = find(begin(deck), end(deck), 2019);
+	if (it == end(deck))
+	{
+		cout << "Not found!!!" << endl;
+		return;
+	}
 
-	map<Packet, bool> send;
-	vector<unique_ptr<IntCodeComputer>>* networkSpace;
-};
+	cout << "Part1:" << distance(begin(deck), it) << endl;
+}
 
-
-void IntCodeComputer::SendToNat(Packet packet)
+vector<Operation> readOperations(const vector<string>& v)
 {
-	nat.SetPacket(packet);
+	vector<Operation> operations;
+
+	for (auto& s : v)
+	{
+		stringstream ss(s);
+		string word;
+		ss >> word;
+
+		if (word == "cut")
+		{
+			long long n{};
+			ss >> n;
+
+			operations.push_back({ Operation::Type::ROTATE, n });
+		}
+		else
+		{
+			string nextWord;
+			ss >> nextWord;
+			if (nextWord == "into")
+			{
+				operations.push_back({ Operation::Type::REVERSE });
+			}
+			else
+			{
+				ss >> nextWord;
+
+				long long n{};
+				ss >> n;
+
+				operations.push_back({ Operation::Type::INCREMENT, n });
+			}
+		}
+	}
+
+	return operations;
+}
+
+int n = 0;
+unordered_map<long long, bool> exists;
+
+long long runPosition(ostream& out, const vector<Operation>& operations, long long position, long long iterations)
+{
+	for (long long i = 0; i < iterations; ++i)
+	{
+		// run operations
+		for (auto& operation : operations)
+		{
+			switch (operation.type)
+			{
+			case Operation::Type::ROTATE:
+			{
+				long long rotatePosition = getCutPosition(operation.value);
+				position = ((position + kDeckSize) - rotatePosition) % kDeckSize;
+			}
+			break;
+			case Operation::Type::REVERSE:
+			{
+				position = getReversePosition(position);
+			}
+			break;
+			case Operation::Type::INCREMENT:
+			{
+				position = getNextIncrementPosition(position, operation.value);
+			};
+			break;
+			}
+
+		}
+
+		out << position << endl;
+
+		if (exists[position])
+			cout << "EVRICA!!! : " << i << " : " << ++n << endl;
+
+		exists[position] = true;
+	}
+
+
+	return position;
 }
 
 int main()
 {
-  ifstream in("..\\..\\Day22\\src\\Day22.in");
-  ofstream out("..\\..\\Day22\\src\\Day22.out");
-  
-  FStreamReader reader(in);
+	ifstream in("..\\..\\Day21\\src\\Day21.in");
+	ofstream out("..\\..\\Day21\\src\\Day21.out");
 
-  auto memory = reader.ReadVectorSeparatedByChar<INT>();
-  memory.resize(memory.size() + 100000);
+	FStreamReader reader(in);
+	auto v = reader.ReadVectorOfWords();
 
-  NAT nat;
-  vector<unique_ptr<IntCodeComputer>> nics;
+	vector<Operation> operations = readOperations(v);
 
-  for (int i = 0; i < 50; ++i)
-  {
-	  nics.push_back(make_unique<IntCodeComputer>(memory, nat));
-  }
+	//part1(v);
 
-  // run NIC's
-  vector<thread> workers;
-  for (int i = 0; i < 50; ++i)
-  {
-    nics[i]->setNetworkSpace(&nics);
-	workers.push_back(thread{ [&nics, i]() { nics[i]->run(i); } });
-  }
+	for (int i = 0; i < 1; ++i)
+	{
+		long long newPosition = runPosition(out, operations, 2020, 10);
+		out << endl;
+		// out << newPosition << endl;
+	}
 
-  // run NAT
-  nat.setNetworkSpace(&nics);
-  thread natWorker{ [&]() { nat.run(); } };
+	cout << 100638597289719 - 72218748140643 << endl;
+	cout << 72218748140643 - 104303908009190 << endl;
+	cout << 104303908009190 - 100246725387438 << endl;
+	cout << 100246725387438 - 10897014506395 << endl;
+	cout << 10897014506395 - 2007130324474 << endl;
+	cout << 2007130324474 - 45892765961820 << endl;
+	cout << 45892765961820 - 5777744825668 << endl;
+	cout << 5777744825668 - 37318630879371 << endl;
+	cout << 37318630879371 - 56681511722340 << endl;
 
-  // wait for all
-  natWorker.join();
-  for (auto& worker : workers)
-  {
-	  worker.join();
-  }
+	// cout << "-----------------" << endl;
+	// 
+	// cout << 93762728371954 - 38538312527045 << endl;
+	// cout << 38538312527045 - 102629614196183 << endl;
+	// cout << 102629614196183 - 47405198351274 << endl;
+	// cout << 47405198351274 - 111496500020412 << endl;
+	// cout << 111496500020412 - 56272084175503 << endl;
+	// cout << 56272084175503 - 1047668330594 << endl;
+	// cout << 1047668330594 - 65138969999732 << endl;
+	// cout << 65138969999732 - 9914554154823 << endl;
+	// cout << 9914554154823 - 74005855823961 << endl;
+	// 
+	// cout << "-----------------" << endl;
+	// 
+	// long long x = 93762728371954;
+	// for (int i = 0; i < 10; i++)
+	// {
+	   //  cout << x << endl;
+	   //  x = (x + 64091301669138) % kDeckSize;
+	// }
 
 
-  return 0;
+
+  //  auto primes = AOC::Eratosthenes(1000000);
+  //  for (int i = 0; i < 10000; i++)
+  //  {
+  //		int ok = true;
+  //		for (auto increment : increments)
+  //		{	  ok = ok && (AOC::Cmmdc(i, increment) == 1);
+  //		}
+  //  
+  //		if (ok && !primes[i])
+  //		{	  out << "OK:" << i << endl;
+  //		}
+  //  }
+
+	// damn good
+	// for (auto increment: increments)
+	// {
+	   //  cout << AOC::Cmmdc(17574135437386+1, increment) << " ";
+	// }
+
+	// vector<int> deck;
+	// FStreamWriter writter(out);
+	// writter.WriteVector(deck);
+	// 
+	// auto it = find(begin(deck), end(deck), 2019);
+	// if (it == end(deck))
+	// {
+	   //  cout << "Not found!!!" << endl;
+	   //  return 0;
+	// }
+	// 
+	// cout << "Part1:" << distance(begin(deck), it) << endl;
+
+	return 0;
 }

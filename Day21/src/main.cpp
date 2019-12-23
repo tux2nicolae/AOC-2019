@@ -16,6 +16,10 @@
 #include <optional>
 #include <numeric>
 #include <assert.h>
+#include <stack>
+#include <queue>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -25,280 +29,208 @@ using namespace std;
 #include "../../AOCLib/src/Math.h"
 #include "../../AOCLib/src/Time.h"
 
-const long long kDeckSize = 119315717514047;
-const long long kTestIterations = 1;
+// part 1
+//
+// NOT A T
+// NOT C J
+// OR T J
+// AND D J
 
-struct Operation
+// part 2
+//
+// NOT C T
+// AND H T
+// NOT B J
+// OR T J
+// NOT A T
+// OR T J
+// AND D J
+
+struct AsciiIO
 {
-	enum class Type {
-		ROTATE,
-		REVERSE,
-		INCREMENT,
+	char GetInput()
+	{
+		char c = {};
+		cin >> noskipws >> c;
+
+		return c;
 	};
 
-	Type type;
-	long long value{};
+	int last = 0;
+	void reportMap(int c)
+	{
+		last = c;
+		cout << char(c);
+	}
+
 };
 
+AsciiIO io;
 
-long long getCutPosition(long long cut)
-{
-	return (kDeckSize + cut) % kDeckSize;
-}
+using INT = long long;
 
-long long getReversePosition(long long from)
-{
-	return (kDeckSize - from % kDeckSize) - 1;
-}
-
-long long getNextIncrementPosition(long long from, long long increment)
-{
-	return (from * increment) % kDeckSize;
-}
-
-vector<long long> dealWithIncrement(const vector<long long>& deck, long long n)
-{
-	long long popTop{ 0 };
-	vector<long long> newDeck(kDeckSize, 0);
-
-	for (long long i = 0; i < deck.size(); i++)
+class IntCodeComputer {
+public:
+	IntCodeComputer(const vector<INT>& memory)
+		: memory(memory)
 	{
-		newDeck[getNextIncrementPosition(i, n)] = deck[i];
 	}
 
-	return newDeck;
-}
-
-vector<long long> dealWithNewStack(const vector<long long>& deck)
-{
-	long long popTop{ 0 };
-	vector<long long> newDeck(deck.size(), 0);
-
-	for (long long i = 0; i < deck.size(); i++)
+	bool run(const vector<INT>& input)
 	{
-		newDeck[getReversePosition(i)] = deck[i];
-	}
+		AOC::Point outputPos;
 
-	return newDeck;
-}
-
-void part1(const vector<string> & v)
-{
-	vector<long long> deck(kDeckSize, 0);
-	std::iota(deck.begin(), deck.end(), 0);
-
-	for (auto& s : v)
-	{
-		stringstream ss(s);
-
-		string word;
-		ss >> word;
-
-		if (word == "cut")
+		while (true)
 		{
-			long long n{};
-			ss >> n;
-
-			long long rotatePosition = getCutPosition(n);
-			rotate(begin(deck), begin(deck) + rotatePosition, end(deck));
-		}
-		else
-		{
-			string nextWord;
-			ss >> nextWord;
-			if (nextWord == "into")
+			INT opcode = memory[++i] % 100;
+			if (opcode == 99)
 			{
-				deck = dealWithNewStack(deck);
-			}
-			else
-			{
-				ss >> nextWord;
-
-				long long n{};
-				ss >> n;
-
-				deck = dealWithIncrement(deck, n);
-			}
-		}
-	}
-
-	auto it = find(begin(deck), end(deck), 2019);
-	if (it == end(deck))
-	{
-		cout << "Not found!!!" << endl;
-		return;
-	}
-
-	cout << "Part1:" << distance(begin(deck), it) << endl;
-}
-
-vector<Operation> readOperations(const vector<string>& v)
-{
-	vector<Operation> operations;
-
-	for (auto& s : v)
-	{
-		stringstream ss(s);
-		string word;
-		ss >> word;
-
-		if (word == "cut")
-		{
-			long long n{};
-			ss >> n;
-
-			operations.push_back({ Operation::Type::ROTATE, n });
-		}
-		else
-		{
-			string nextWord;
-			ss >> nextWord;
-			if (nextWord == "into")
-			{
-				operations.push_back({ Operation::Type::REVERSE });
-			}
-			else
-			{
-				ss >> nextWord;
-
-				long long n{};
-				ss >> n;
-
-				operations.push_back({ Operation::Type::INCREMENT, n });
-			}
-		}
-	}
-
-	return operations;
-}
-
-int n = 0;
-unordered_map<long long, bool> exists;
-
-long long runPosition(ostream & out, const vector<Operation>& operations, long long position, long long iterations)
-{
-	for (long long i = 0; i < iterations; ++i)
-	{
-		// run operations
-		for (auto& operation : operations)
-		{
-			switch (operation.type)
-			{
-				case Operation::Type::ROTATE:
-				{
-					long long rotatePosition = getCutPosition(operation.value);
-					position = ((position + kDeckSize) - rotatePosition) % kDeckSize;
-				}
-				break;
-				case Operation::Type::REVERSE:
-				{
-					position = getReversePosition(position);
-				}
-				break;
-				case Operation::Type::INCREMENT:
-				{
-					position = getNextIncrementPosition(position, operation.value);
-				};
-				break;
+				return true;
 			}
 
+			INT aMode = (memory[i] / 100) % 10;
+			INT bMode = (memory[i] / 1000) % 10;
+			INT cMode = (memory[i] / 10000) % 10;
+
+			if (opcode == 1)
+			{
+				INT a = getValue(aMode);
+				INT b = getValue(bMode);
+
+				INT c = getOutputPos(cMode);
+				memory[c] = a + b;
+			}
+			else if (opcode == 2)
+			{
+				INT a = getValue(aMode);
+				INT b = getValue(bMode);
+
+				INT c = getOutputPos(cMode);
+				memory[c] = a * b;
+			}
+
+			// input
+			else if (opcode == 3)
+			{
+				INT a = getOutputPos(aMode);
+				memory[a] = io.GetInput();
+			}
+			// output
+			else if (opcode == 4)
+			{
+				INT a = getValue(aMode);
+				io.reportMap(a);
+			}
+			else if (opcode == 5)
+			{
+				INT a = getValue(aMode);
+				INT b = getValue(bMode);
+
+				if (a)
+					i = b - 1;
+			}
+			else if (opcode == 6)
+			{
+				INT a = getValue(aMode);
+				INT b = getValue(bMode);
+
+				if (!a)
+					i = b - 1;
+			}
+			else if (opcode == 7)
+			{
+				INT a = getValue(aMode);
+				INT b = getValue(bMode);
+
+
+				INT c = getOutputPos(cMode);
+				memory[c] = a < b;
+			}
+			else if (opcode == 8)
+			{
+				INT a = getValue(aMode);
+				INT b = getValue(bMode);
+
+				INT c = getOutputPos(cMode);
+				memory[c] = a == b;
+			}
+			else if (opcode == 9)
+			{
+				INT a = getValue(aMode);
+				mRelativeBase += a;
+			}
 		}
 
-        out << position << endl;
-
-		if (exists[position])
-			cout << "EVRICA!!! : " << i << " : " << ++n << endl;
-
-		exists[position] = true;
+		return true;
 	}
 
+	INT GetOutput() {
+		return mOutput;
+	};
 
-	return position;
-}
+private:
+	// address pointer
+	INT i{ -1 };
+
+	// memory
+	vector<INT> memory;
+
+	// output
+	INT mOutput{ 0 };
+
+	// relative base
+	INT mRelativeBase{ 0 };
+
+	//---------------------------------------
+
+	INT getValue(INT mode)
+	{
+		if (mode == 0)
+		{
+			size_t pos = memory[++i];
+			return memory[pos];
+		}
+		else if (mode == 1)
+		{
+			return memory[++i];
+		}
+		else if (mode == 2)
+		{
+			return memory[memory[++i] + mRelativeBase];
+		}
+
+		return 0;
+	}
+
+	INT getOutputPos(INT mode)
+	{
+		if (mode == 0)
+			return memory[++i];
+		if (mode == 2)
+			return memory[++i] + mRelativeBase;
+
+		assert(mode != 1);
+		return 0;
+	}
+};
 
 int main()
 {
-  ifstream in("..\\..\\Day21\\src\\Day21.in");
-  ofstream out("..\\..\\Day21\\src\\Day21.out");
+	ifstream in("..\\..\\Day20\\src\\Day20.in");
+	ofstream out("..\\..\\Day20\\src\\Day20.out");
 
-  FStreamReader reader(in);
-  auto v = reader.ReadVectorOfWords();
+	FStreamReader reader(in);
 
-  vector<Operation> operations = readOperations(v);
+	auto memory = reader.ReadVectorSeparatedByChar<INT>();
+	memory.resize(memory.size() + 10000000);
 
-  //part1(v);
+	// create computer
+	vector<INT> input;
+	IntCodeComputer mapComputer(memory);
+	mapComputer.run(input);
 
-  for(int i = 0; i < 1; ++i)
-  {
-	long long newPosition = runPosition(out, operations, 2020, 10);
-	out << endl;
-	// out << newPosition << endl;
-  }
+	cout << io.last;
 
-  cout << 100638597289719 -   72218748140643 << endl;
-  cout << 72218748140643  -   104303908009190 << endl;
-  cout << 104303908009190 -   100246725387438 << endl;
-  cout << 100246725387438 -   10897014506395 << endl;
-  cout << 10897014506395  -   2007130324474 << endl;
-  cout << 2007130324474   -   45892765961820 << endl;
-  cout << 45892765961820  -   5777744825668 << endl;
-  cout << 5777744825668   -   37318630879371 << endl;
-  cout << 37318630879371  -   56681511722340 << endl;
-
-  // cout << "-----------------" << endl;
-  // 
-  // cout << 93762728371954 - 38538312527045 << endl;
-  // cout << 38538312527045 - 102629614196183 << endl;
-  // cout << 102629614196183 - 47405198351274 << endl;
-  // cout << 47405198351274 - 111496500020412 << endl;
-  // cout << 111496500020412 - 56272084175503 << endl;
-  // cout << 56272084175503 - 1047668330594 << endl;
-  // cout << 1047668330594 - 65138969999732 << endl;
-  // cout << 65138969999732 - 9914554154823 << endl;
-  // cout << 9914554154823 - 74005855823961 << endl;
-  // 
-  // cout << "-----------------" << endl;
-  // 
-  // long long x = 93762728371954;
-  // for (int i = 0; i < 10; i++)
-  // {
-	 //  cout << x << endl;
-	 //  x = (x + 64091301669138) % kDeckSize;
-  // }
-
-
-
-//  auto primes = AOC::Eratosthenes(1000000);
-//  for (int i = 0; i < 10000; i++)
-//  {
-//		int ok = true;
-//		for (auto increment : increments)
-//		{	  ok = ok && (AOC::Cmmdc(i, increment) == 1);
-//		}
-//  
-//		if (ok && !primes[i])
-//		{	  out << "OK:" << i << endl;
-//		}
-//  }
-
-  // damn good
-  // for (auto increment: increments)
-  // {
-	 //  cout << AOC::Cmmdc(17574135437386+1, increment) << " ";
-  // }
-  
-  // vector<int> deck;
-  // FStreamWriter writter(out);
-  // writter.WriteVector(deck);
-  // 
-  // auto it = find(begin(deck), end(deck), 2019);
-  // if (it == end(deck))
-  // {
-	 //  cout << "Not found!!!" << endl;
-	 //  return 0;
-  // }
-  // 
-  // cout << "Part1:" << distance(begin(deck), it) << endl;
-
-  return 0;
+	// space.printMap(out);
+	return 0;
 }
